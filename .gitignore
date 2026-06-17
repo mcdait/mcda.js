@@ -1,0 +1,4 @@
+.nvmrc
+.idea
+dist
+node_modules
