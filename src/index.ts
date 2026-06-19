@@ -1,13 +1,13 @@
-import { CriterionType } from "./core/AbstractDecisionProblem";
 import { PrometheeDecisionProblem } from "./core/PrometheeDecisionProblem";
 import { TopsisDecisionProblem } from "./core/TopsisDecisionProblem";
+import { CriterionType } from "./types";
 import { vectorNormalizationCallback } from "./utils/normalization";
 
 const alternatives = ["Laptop A", "Laptop B", "Laptop C"];
 
 const problem = new TopsisDecisionProblem();
 
-problem.setDebugBag({}) //tells us if we want to collect debug data
+problem.enableDebug(true)
 
 problem.setMatrix([
     [8, 7, 1200],

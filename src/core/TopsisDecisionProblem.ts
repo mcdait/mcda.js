@@ -1,12 +1,16 @@
-import {
-    AbstractDecisionProblem,
-    CriterionType,
-    type DecisionMatrix,
-    type Scores,
-    ConfigurableNormalizationInterface, NormalizationCallback
-} from "./AbstractDecisionProblem";
+import { AbstractDecisionProblem } from "./AbstractDecisionProblem";
+import { CriterionType } from "../types";
+import type {
+    ConfigurableNormalizationInterface,
+    DecisionMatrix,
+    NormalizationCallback,
+    Scores,
+} from "../types";
 
-export class TopsisDecisionProblem extends AbstractDecisionProblem implements ConfigurableNormalizationInterface {
+export class TopsisDecisionProblem
+    extends AbstractDecisionProblem
+    implements ConfigurableNormalizationInterface
+{
     public override compute(): Scores {
         this.validate();
         return this.topsis();
@@ -28,24 +32,24 @@ export class TopsisDecisionProblem extends AbstractDecisionProblem implements Co
         }
 
         const normalizedMatrix = this.normalizationCallback(this.getMatrix());
-        this.addToDebugBag('normalizedMatrix', normalizedMatrix)
+        this.addToDebugBag("normalizedMatrix", normalizedMatrix);
         const weightedNormalizedMatrix =
             this.applyWeights(normalizedMatrix);
-        this.addToDebugBag('weightedNormalizedMatrix', weightedNormalizedMatrix)
+        this.addToDebugBag("weightedNormalizedMatrix", weightedNormalizedMatrix);
         const idealBest = this.getIdealValues(weightedNormalizedMatrix, true);
-        this.addToDebugBag('idealBest', idealBest);
+        this.addToDebugBag("idealBest", idealBest);
         const idealWorst = this.getIdealValues(weightedNormalizedMatrix, false);
-        this.addToDebugBag('idealWorst', idealWorst)
+        this.addToDebugBag("idealWorst", idealWorst);
         const distanceToBest = this.getDistances(
             weightedNormalizedMatrix,
             idealBest,
         );
-        this.addToDebugBag('distanceToBest', distanceToBest);
+        this.addToDebugBag("distanceToBest", distanceToBest);
         const distanceToWorst = this.getDistances(
             weightedNormalizedMatrix,
             idealWorst,
         );
-        this.addToDebugBag('distanceToWorst', distanceToWorst);
+        this.addToDebugBag("distanceToWorst", distanceToWorst);
         const scores = distanceToWorst.map((worstDistance, alternativeIndex) => {
             const bestDistance = distanceToBest[alternativeIndex] ?? 0;
             const denominator = bestDistance + worstDistance;

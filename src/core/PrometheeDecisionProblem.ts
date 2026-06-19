@@ -1,20 +1,22 @@
-import {
-    AbstractDecisionProblem,
-    CriterionType,
+import { AbstractDecisionProblem } from "./AbstractDecisionProblem";
+import { CriterionType } from "../types";
+import type {
     ConfigurableNormalizationInterface,
-    type DecisionMatrix,
-    type Scores,
-} from "./AbstractDecisionProblem";
-import {NormalizationCallback} from "./AbstractDecisionProblem";
+    DecisionMatrix,
+    NormalizationCallback,
+    Scores,
+} from "../types";
 
-export class PrometheeDecisionProblem extends AbstractDecisionProblem implements ConfigurableNormalizationInterface {
+export class PrometheeDecisionProblem
+    extends AbstractDecisionProblem
+    implements ConfigurableNormalizationInterface
+{
     public override compute(): Scores {
         this.validate();
         return this.promethee();
     }
 
     private promethee(): Scores {
-
         if (this.normalizationCallback === undefined) {
             throw new Error("PROMETHEE requires a normalization callback.");
         }

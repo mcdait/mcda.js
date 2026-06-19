@@ -1,4 +1,4 @@
-import type { DecisionMatrix } from "../core/AbstractDecisionProblem";
+import type { DecisionMatrix } from "../types";
 
 export function vectorNormalizationCallback(
     matrix: DecisionMatrix,
