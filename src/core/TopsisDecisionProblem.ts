@@ -104,7 +104,7 @@ export class TopsisDecisionProblem
             const benefitValue = bestValues ? Math.max : Math.min;
             const costValue = bestValues ? Math.min : Math.max;
             const picker =
-                type === CriterionType.Benefit ? benefitValue : costValue;
+                type === CriterionType.BENEFIT ? benefitValue : costValue;
 
             return picker(...values);
         });

@@ -81,7 +81,7 @@ export class PrometheeDecisionProblem
             const rightValue = rightAlternative[criterionIndex] ?? 0;
             const type = this.getTypes()[criterionIndex];
             const difference =
-                type === CriterionType.Benefit
+                type === CriterionType.BENEFIT
                     ? leftValue - rightValue
                     : rightValue - leftValue;
             const preference = difference > 0 ? difference : 0;

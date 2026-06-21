@@ -16,9 +16,9 @@ problem.setMatrix([
 ]);
 problem.setWeights([0.4, 0.35, 0.25]);
 problem.setTypes([
-    CriterionType.Benefit,
-    CriterionType.Benefit,
-    CriterionType.Cost,
+    CriterionType.BENEFIT,
+    CriterionType.BENEFIT,
+    CriterionType.COST,
 ]);
 problem.setNormalizationCallback(vectorNormalizationCallback);
 
