@@ -5,8 +5,8 @@ export type NormalizationCallback = (
 ) => DecisionMatrix;
 
 export interface ConfigurableNormalizationInterface {
-    getNormalizationCallback(): NormalizationCallback | undefined;
-    setNormalizationCallback(
+    get normalizationCallback(): NormalizationCallback | undefined;
+    set normalizationCallback(
         callback: NormalizationCallback | undefined,
-    ): void;
+    );
 }

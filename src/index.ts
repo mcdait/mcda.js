@@ -9,18 +9,18 @@ const problem = new TopsisDecisionProblem();
 
 problem.enableDebug(true)
 
-problem.setMatrix([
+problem.matrix = [
     [8, 7, 1200],
     [7, 9, 1000],
     [9, 6, 1400],
-]);
-problem.setWeights([0.4, 0.35, 0.25]);
-problem.setTypes([
+];
+problem.weights = [0.4, 0.35, 0.25];
+problem.types = [
     CriterionType.BENEFIT,
     CriterionType.BENEFIT,
     CriterionType.COST,
-]);
-problem.setNormalizationCallback(vectorNormalizationCallback);
+];
+problem.normalizationCallback = vectorNormalizationCallback;
 
 const scores = problem.compute();
 console.debug(scores)
@@ -38,14 +38,14 @@ for (const result of ranking) {
 }
 
 console.log('TOPSIS debug bag:');
-console.debug(problem.getDebugBag())
+console.debug(problem.debugBag)
 
 // const prometheeProblem = new PrometheeDecisionProblem();
 //
-// prometheeProblem.setMatrix(problem.getMatrix());
-// prometheeProblem.setWeights(problem.getWeights());
-// prometheeProblem.setTypes(problem.getTypes());
-// prometheeProblem.setNormalizationCallback(vectorNormalizationCallback);
+// prometheeProblem.matrix = problem.matrix;
+// prometheeProblem.weights = problem.weights;
+// prometheeProblem.types = problem.types;
+// prometheeProblem.normalizationCallback = vectorNormalizationCallback;
 //
 // const prometheeScores = prometheeProblem.compute();
 // const prometheeRanking = prometheeScores

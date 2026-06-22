@@ -1,15 +1,12 @@
-import { AbstractDecisionProblem } from "./AbstractDecisionProblem";
 import { CriterionType } from "../types";
 import type {
-    ConfigurableNormalizationInterface,
     DecisionMatrix,
-    NormalizationCallback,
     Scores,
 } from "../types";
+import {AbstractNormalizedDecisionProblem} from "./AbstractNormalizedDecisionProblem";
 
 export class PrometheeDecisionProblem
-    extends AbstractDecisionProblem
-    implements ConfigurableNormalizationInterface
+    extends AbstractNormalizedDecisionProblem
 {
     public override compute(): Scores {
         this.validate();
@@ -21,7 +18,7 @@ export class PrometheeDecisionProblem
             throw new Error("PROMETHEE requires a normalization callback.");
         }
 
-        const normalizedMatrix = this.normalizationCallback(this.getMatrix());
+        const normalizedMatrix = this.normalizationCallback(this.matrix);
         const preferenceMatrix = this.getPreferenceMatrix(normalizedMatrix);
         const positiveFlows = this.getPositiveFlows(preferenceMatrix);
         const negativeFlows = this.getNegativeFlows(preferenceMatrix);
@@ -34,21 +31,21 @@ export class PrometheeDecisionProblem
     }
 
     protected validate(): void {
-        const criteriaCount = this.getWeights().length;
+        const criteriaCount = this.weights.length;
 
         if (criteriaCount === 0) {
             throw new Error("PROMETHEE requires at least one criterion.");
         }
 
-        if (this.getTypes().length !== criteriaCount) {
+        if (this.types.length !== criteriaCount) {
             throw new Error("PROMETHEE requires one criterion type per weight.");
         }
 
-        if (this.getMatrix().length === 0) {
+        if (this.matrix.length === 0) {
             throw new Error("PROMETHEE requires at least one alternative.");
         }
 
-        for (const row of this.getMatrix()) {
+        for (const row of this.matrix) {
             if (row.length !== criteriaCount) {
                 throw new Error(
                     "PROMETHEE matrix rows must match the weights length.",
@@ -76,10 +73,10 @@ export class PrometheeDecisionProblem
         leftAlternative: number[],
         rightAlternative: number[],
     ): number {
-        return this.getWeights().reduce((sum, weight, criterionIndex) => {
+        return this.weights.reduce((sum, weight, criterionIndex) => {
             const leftValue = leftAlternative[criterionIndex] ?? 0;
             const rightValue = rightAlternative[criterionIndex] ?? 0;
-            const type = this.getTypes()[criterionIndex];
+            const type = this.types[criterionIndex];
             const difference =
                 type === CriterionType.BENEFIT
                     ? leftValue - rightValue
@@ -114,13 +111,4 @@ export class PrometheeDecisionProblem
         return sum / (values.length - 1);
     }
 
-    public getNormalizationCallback(): NormalizationCallback | undefined {
-        return this.normalizationCallback;
-    }
-
-    public setNormalizationCallback(
-        normalizationCallback: NormalizationCallback | undefined,
-    ): void {
-        this.normalizationCallback = normalizationCallback;
-    }
 }

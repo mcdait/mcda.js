@@ -2,16 +2,16 @@ import type { CriterionType } from "./criteria";
 import type { DecisionMatrix } from "./decision";
 
 export interface MatrixInputInterface {
-    getMatrix(): DecisionMatrix;
-    setMatrix(matrix: DecisionMatrix): void;
+    get matrix(): DecisionMatrix;
+    set matrix(matrix: DecisionMatrix);
 }
 
 export interface WeightsInputInterface {
-    getWeights(): number[];
-    setWeights(weights: number[]): void;
+    get weights(): number[];
+    set weights(weights: number[]);
 }
 
 export interface CriteriaTypesInputInterface {
-    getTypes(): CriterionType[];
-    setTypes(types: CriterionType[]): void;
+    get types(): CriterionType[];
+    set types(types: CriterionType[]);
 }

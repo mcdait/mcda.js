@@ -1,29 +1,16 @@
-import { AbstractDecisionProblem } from "./AbstractDecisionProblem";
 import { CriterionType } from "../types";
 import type {
-    ConfigurableNormalizationInterface,
     DecisionMatrix,
-    NormalizationCallback,
     Scores,
 } from "../types";
+import {AbstractNormalizedDecisionProblem} from "./AbstractNormalizedDecisionProblem";
 
 export class TopsisDecisionProblem
-    extends AbstractDecisionProblem
-    implements ConfigurableNormalizationInterface
+    extends AbstractNormalizedDecisionProblem
 {
     public override compute(): Scores {
         this.validate();
         return this.topsis();
-    }
-
-    public getNormalizationCallback(): NormalizationCallback | undefined {
-        return this.normalizationCallback;
-    }
-
-    public setNormalizationCallback(
-        normalizationCallback: NormalizationCallback | undefined,
-    ): void {
-        this.normalizationCallback = normalizationCallback;
     }
 
     private topsis(): Scores {
@@ -31,7 +18,7 @@ export class TopsisDecisionProblem
             throw new Error("TOPSIS requires a normalization callback.");
         }
 
-        const normalizedMatrix = this.normalizationCallback(this.getMatrix());
+        const normalizedMatrix = this.normalizationCallback(this.matrix);
         this.addToDebugBag("normalizedMatrix", normalizedMatrix);
         const weightedNormalizedMatrix =
             this.applyWeights(normalizedMatrix);
@@ -61,21 +48,21 @@ export class TopsisDecisionProblem
     }
 
     protected validate(): void {
-        const criteriaCount = this.getWeights().length;
+        const criteriaCount = this.weights.length;
 
         if (criteriaCount === 0) {
             throw new Error("TOPSIS requires at least one criterion.");
         }
 
-        if (this.getTypes().length !== criteriaCount) {
+        if (this.types.length !== criteriaCount) {
             throw new Error("TOPSIS requires one criterion type per weight.");
         }
 
-        if (this.getMatrix().length === 0) {
+        if (this.matrix.length === 0) {
             throw new Error("TOPSIS requires at least one alternative.");
         }
 
-        for (const row of this.getMatrix()) {
+        for (const row of this.matrix) {
             if (row.length !== criteriaCount) {
                 throw new Error(
                     "TOPSIS matrix rows must match the weights length.",
@@ -87,7 +74,7 @@ export class TopsisDecisionProblem
     private applyWeights(matrix: DecisionMatrix): DecisionMatrix {
         return matrix.map((row) =>
             row.map((value, criterionIndex) => {
-                const weight = this.getWeights()[criterionIndex] ?? 0;
+                const weight = this.weights[criterionIndex] ?? 0;
 
                 return value * weight;
             }),
@@ -98,9 +85,9 @@ export class TopsisDecisionProblem
         matrix: DecisionMatrix,
         bestValues: boolean,
     ): number[] {
-        return this.getWeights().map((_, criterionIndex) => {
+        return this.weights.map((_, criterionIndex) => {
             const values = matrix.map((row) => row[criterionIndex] ?? 0);
-            const type = this.getTypes()[criterionIndex];
+            const type = this.types[criterionIndex];
             const benefitValue = bestValues ? Math.max : Math.min;
             const costValue = bestValues ? Math.min : Math.max;
             const picker =

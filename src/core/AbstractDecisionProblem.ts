@@ -17,49 +17,48 @@ export abstract class AbstractDecisionProblem
         MatrixInputInterface,
         DebuggableInterface
 {
-    protected weights: number[] = [];
-    protected types: CriterionType[] = [];
-    protected matrix: DecisionMatrix = [];
-    protected debugBag: DebugBag | undefined = undefined;
-    protected normalizationCallback: NormalizationCallback | undefined;
+    protected _weights: number[] = [];
+    protected _types: CriterionType[] = [];
+    protected _matrix: DecisionMatrix = [];
+    protected _debugBag: DebugBag | undefined = undefined;
 
-    public getWeights(): number[] {
-        return this.weights;
+    public get weights(): number[] {
+        return this._weights;
     }
 
-    public setWeights(weights: number[]): void {
-        this.weights = weights;
+    public set weights(weights: number[]) {
+        this._weights = weights;
     }
 
-    public getTypes(): CriterionType[] {
-        return this.types;
+    public get types(): CriterionType[] {
+        return this._types;
     }
 
-    public setTypes(types: CriterionType[]): void {
-        this.types = types;
+    public set types(types: CriterionType[]) {
+        this._types = types;
     }
 
-    public getMatrix(): DecisionMatrix {
-        return this.matrix;
+    public get matrix(): DecisionMatrix {
+        return this._matrix;
     }
 
-    public setMatrix(matrix: DecisionMatrix): void {
-        this.matrix = matrix;
+    public set matrix(matrix: DecisionMatrix) {
+        this._matrix = matrix;
     }
 
-    public getDebugBag(): DebugBag | undefined {
-        return this.debugBag;
+    public get debugBag(): DebugBag | undefined {
+        return this._debugBag;
     }
 
     public enableDebug(enableDebug:boolean): void {
-        this.debugBag = {};
+        this._debugBag = {};
     }
 
     public abstract compute(): Scores;
     protected abstract validate(): void
 
     public addToDebugBag(field: string, value: unknown): void {
-        const debugBag = this.getDebugBag();
+        const debugBag = this.debugBag;
 
         if (debugBag !== undefined) {
             debugBag[field] = value;
