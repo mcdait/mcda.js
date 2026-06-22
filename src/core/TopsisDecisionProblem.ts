@@ -8,7 +8,7 @@ import {AbstractNormalizedDecisionProblem} from "./AbstractNormalizedDecisionPro
 export class TopsisDecisionProblem
     extends AbstractNormalizedDecisionProblem
 {
-    public override compute(): Scores {
+    public get scores(): Scores {
         this.validate();
         return this.topsis();
     }

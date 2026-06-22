@@ -8,7 +8,6 @@ import type {
     WeightsInputInterface,
 } from "../types";
 import type { CriterionType } from "../types";
-import type { NormalizationCallback } from "../types";
 
 export abstract class AbstractDecisionProblem
     implements
@@ -54,7 +53,7 @@ export abstract class AbstractDecisionProblem
         this._debugBag = {};
     }
 
-    public abstract compute(): Scores;
+    public abstract get scores(): Scores;
     protected abstract validate(): void
 
     public addToDebugBag(field: string, value: unknown): void {

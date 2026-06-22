@@ -8,7 +8,7 @@ import {AbstractNormalizedDecisionProblem} from "./AbstractNormalizedDecisionPro
 export class PrometheeDecisionProblem
     extends AbstractNormalizedDecisionProblem
 {
-    public override compute(): Scores {
+    public override get scores(): Scores {
         this.validate();
         return this.promethee();
     }

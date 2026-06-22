@@ -22,7 +22,7 @@ problem.types = [
 ];
 problem.normalizationCallback = vectorNormalizationCallback;
 
-const scores = problem.compute();
+const scores = problem.scores;
 console.debug(scores)
 const ranking = scores
     .map((score, index) => ({
@@ -47,7 +47,7 @@ console.debug(problem.debugBag)
 // prometheeProblem.types = problem.types;
 // prometheeProblem.normalizationCallback = vectorNormalizationCallback;
 //
-// const prometheeScores = prometheeProblem.compute();
+// const prometheeScores = prometheeProblem.scores;
 // const prometheeRanking = prometheeScores
 //     .map((score, index) => ({
 //         alternative: alternatives[index],
