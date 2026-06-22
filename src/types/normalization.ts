@@ -1,4 +1,4 @@
-import type { DecisionMatrix } from "./decision";
+import type { DecisionMatrix } from "./types";
 
 export type NormalizationCallback = (
     matrix: DecisionMatrix,

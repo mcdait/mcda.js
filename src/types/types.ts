@@ -1,5 +1,10 @@
-import type { CriterionType } from "./criteria";
-import type { DecisionMatrix } from "./decision";
+export enum CriterionType {
+    BENEFIT = 1, // higher values are better
+    COST = -1, // lower values are better
+}
+
+export type DecisionMatrix = number[][];
+export type Scores = number[];
 
 export interface MatrixInputInterface {
     get matrix(): DecisionMatrix;

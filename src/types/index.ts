@@ -1,13 +1,14 @@
-export { CriterionType } from "./criteria";
+export { CriterionType } from "./types";
 export type { DebugBag, DebuggableInterface } from "./debug";
-export type { DecisionMatrix, Scores } from "./decision";
 export type {
+    DecisionMatrix,
+    Scores,
     AlternativesInputInterface,
     CriteriaInputInterface,
     CriteriaTypesInputInterface,
     MatrixInputInterface,
     WeightsInputInterface,
-} from "./inputs";
+} from "./types";
 export type {
     ConfigurableNormalizationInterface,
     NormalizationCallback,
