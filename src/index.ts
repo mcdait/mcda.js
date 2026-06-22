@@ -2,6 +2,7 @@ import { PrometheeDecisionProblem } from "./core/PrometheeDecisionProblem";
 import { TopsisDecisionProblem } from "./core/TopsisDecisionProblem";
 import { CriterionType } from "./types";
 import { vectorNormalizationCallback } from "./utils/normalization";
+import { rank } from "./utils/ranking";
 
 const problem = new TopsisDecisionProblem();
 
@@ -24,9 +25,11 @@ problem.normalizationCallback = vectorNormalizationCallback;
 
 const scores = problem.scores;
 console.debug(scores)
+const ranks = rank(scores);
 const ranking = scores
     .map((score, index) => ({
         alternative: problem.alternatives[index],
+        rank: ranks[index],
         score,
     }))
     .sort((left, right) => right.score - left.score);
@@ -34,7 +37,9 @@ const ranking = scores
 console.log("TOPSIS scores:");
 
 for (const result of ranking) {
-    console.log(`${result.alternative}: ${result.score.toFixed(4)}`);
+    console.log(
+        `${result.alternative}: score=${result.score.toFixed(4)}, rank=${result.rank}`,
+    );
 }
 
 console.log('TOPSIS debug bag:');
