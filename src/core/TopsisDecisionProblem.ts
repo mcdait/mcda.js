@@ -1,9 +1,9 @@
-import { CriterionType } from "../types";
+import { CriterionType } from "../types/index.js";
 import type {
     DecisionMatrix,
     Scores,
-} from "../types";
-import {AbstractNormalizedDecisionProblem} from "./AbstractNormalizedDecisionProblem";
+} from "../types/index.js";
+import {AbstractNormalizedDecisionProblem} from "./AbstractNormalizedDecisionProblem.js";
 
 export class TopsisDecisionProblem
     extends AbstractNormalizedDecisionProblem

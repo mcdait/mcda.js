@@ -1,5 +1,5 @@
-export { CriterionType } from "./types";
-export type { DebugBag, DebuggableInterface } from "./debug";
+export { CriterionType } from "./types.js";
+export type { DebugBag, DebuggableInterface } from "./debug.js";
 export type {
     DecisionMatrix,
     Scores,
@@ -8,8 +8,8 @@ export type {
     CriteriaTypesInputInterface,
     MatrixInputInterface,
     WeightsInputInterface,
-} from "./types";
+} from "./types.js";
 export type {
     ConfigurableNormalizationInterface,
     NormalizationCallback,
-} from "./normalization";
+} from "./normalization.js";

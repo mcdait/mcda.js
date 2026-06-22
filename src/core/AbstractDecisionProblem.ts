@@ -8,8 +8,8 @@ import type {
     MatrixInputInterface,
     Scores,
     WeightsInputInterface,
-} from "../types";
-import type { CriterionType } from "../types";
+} from "../types/index.js";
+import type { CriterionType } from "../types/index.js";
 
 export abstract class AbstractDecisionProblem
     implements

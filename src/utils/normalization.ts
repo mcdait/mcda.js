@@ -1,4 +1,4 @@
-import type { DecisionMatrix } from "../types";
+import type { DecisionMatrix } from "../types/index.js";
 
 export function vectorNormalizationCallback(
     matrix: DecisionMatrix,

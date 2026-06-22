@@ -1,8 +1,8 @@
-import { PrometheeDecisionProblem } from "./core/PrometheeDecisionProblem";
-import { TopsisDecisionProblem } from "./core/TopsisDecisionProblem";
-import { CriterionType } from "./types";
-import { vectorNormalizationCallback } from "./utils/normalization";
-import { rank } from "./utils/ranking";
+import { PrometheeDecisionProblem } from "./core/PrometheeDecisionProblem.js";
+import { TopsisDecisionProblem } from "./core/TopsisDecisionProblem.js";
+import { CriterionType } from "./types/index.js";
+import { vectorNormalizationCallback } from "./utils/normalization.js";
+import { rank } from "./utils/ranking.js";
 
 const problem = new TopsisDecisionProblem();
 
