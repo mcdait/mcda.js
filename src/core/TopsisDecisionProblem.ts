@@ -47,30 +47,6 @@ export class TopsisDecisionProblem
         return scores;
     }
 
-    protected validate(): void {
-        const criteriaCount = this.weights.length;
-
-        if (criteriaCount === 0) {
-            throw new Error("TOPSIS requires at least one criterion.");
-        }
-
-        if (this.types.length !== criteriaCount) {
-            throw new Error("TOPSIS requires one criterion type per weight.");
-        }
-
-        if (this.matrix.length === 0) {
-            throw new Error("TOPSIS requires at least one alternative.");
-        }
-
-        for (const row of this.matrix) {
-            if (row.length !== criteriaCount) {
-                throw new Error(
-                    "TOPSIS matrix rows must match the weights length.",
-                );
-            }
-        }
-    }
-
     private applyWeights(matrix: DecisionMatrix): DecisionMatrix {
         return matrix.map((row) =>
             row.map((value, criterionIndex) => {

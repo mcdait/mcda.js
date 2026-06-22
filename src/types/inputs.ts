@@ -15,3 +15,13 @@ export interface CriteriaTypesInputInterface {
     get types(): CriterionType[];
     set types(types: CriterionType[]);
 }
+
+export interface AlternativesInputInterface {
+    get alternatives(): string[];
+    set alternatives(alternatives: string[]);
+}
+
+export interface CriteriaInputInterface {
+    get criteria(): string[];
+    set criteria(criteria: string[]);
+}

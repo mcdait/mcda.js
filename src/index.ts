@@ -3,12 +3,12 @@ import { TopsisDecisionProblem } from "./core/TopsisDecisionProblem";
 import { CriterionType } from "./types";
 import { vectorNormalizationCallback } from "./utils/normalization";
 
-const alternatives = ["Laptop A", "Laptop B", "Laptop C"];
-
 const problem = new TopsisDecisionProblem();
 
 problem.enableDebug(true)
 
+problem.alternatives = ["Laptop A", "Laptop B", "Laptop C"];
+problem.criteria = ["Performance", "Battery", "Price"];
 problem.matrix = [
     [8, 7, 1200],
     [7, 9, 1000],
@@ -26,7 +26,7 @@ const scores = problem.scores;
 console.debug(scores)
 const ranking = scores
     .map((score, index) => ({
-        alternative: alternatives[index],
+        alternative: problem.alternatives[index],
         score,
     }))
     .sort((left, right) => right.score - left.score);
@@ -42,6 +42,8 @@ console.debug(problem.debugBag)
 
 // const prometheeProblem = new PrometheeDecisionProblem();
 //
+// prometheeProblem.alternatives = problem.alternatives;
+// prometheeProblem.criteria = problem.criteria;
 // prometheeProblem.matrix = problem.matrix;
 // prometheeProblem.weights = problem.weights;
 // prometheeProblem.types = problem.types;
@@ -50,7 +52,7 @@ console.debug(problem.debugBag)
 // const prometheeScores = prometheeProblem.scores;
 // const prometheeRanking = prometheeScores
 //     .map((score, index) => ({
-//         alternative: alternatives[index],
+//         alternative: prometheeProblem.alternatives[index],
 //         score,
 //     }))
 //     .sort((left, right) => right.score - left.score);

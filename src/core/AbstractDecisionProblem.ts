@@ -1,4 +1,6 @@
 import type {
+    AlternativesInputInterface,
+    CriteriaInputInterface,
     CriteriaTypesInputInterface,
     DebugBag,
     DebuggableInterface,
@@ -11,6 +13,8 @@ import type { CriterionType } from "../types";
 
 export abstract class AbstractDecisionProblem
     implements
+        AlternativesInputInterface,
+        CriteriaInputInterface,
         WeightsInputInterface,
         CriteriaTypesInputInterface,
         MatrixInputInterface,
@@ -19,7 +23,25 @@ export abstract class AbstractDecisionProblem
     protected _weights: number[] = [];
     protected _types: CriterionType[] = [];
     protected _matrix: DecisionMatrix = [];
+    protected _alternatives: string[] = [];
+    protected _criteria: string[] = [];
     protected _debugBag: DebugBag | undefined = undefined;
+
+    public get alternatives(): string[] {
+        return this._alternatives;
+    }
+
+    public set alternatives(alternatives: string[]) {
+        this._alternatives = alternatives;
+    }
+
+    public get criteria(): string[] {
+        return this._criteria;
+    }
+
+    public set criteria(criteria: string[]) {
+        this._criteria = criteria;
+    }
 
     public get weights(): number[] {
         return this._weights;
@@ -54,7 +76,67 @@ export abstract class AbstractDecisionProblem
     }
 
     public abstract get scores(): Scores;
-    protected abstract validate(): void
+
+    protected validate(): void {
+        const criteriaCount = this.weights.length;
+
+        if (criteriaCount === 0) {
+            throw new Error("Decision problem requires at least one criterion.");
+        }
+
+        if (this.types.length !== criteriaCount) {
+            throw new Error(
+                "Decision problem requires one criterion type per weight.",
+            );
+        }
+
+        if (this.matrix.length === 0) {
+            throw new Error("Decision problem requires at least one alternative.");
+        }
+
+        for (const row of this.matrix) {
+            if (row.length !== criteriaCount) {
+                throw new Error(
+                    "Decision problem matrix rows must match the weights length.",
+                );
+            }
+        }
+
+        this.validateOptionalNames(
+            this.alternatives,
+            this.matrix.length,
+            "alternative",
+        );
+        this.validateOptionalNames(
+            this.criteria,
+            criteriaCount,
+            "criterion",
+        );
+    }
+
+    private validateOptionalNames(
+        names: string[],
+        expectedCount: number,
+        fieldName: string,
+    ): void {
+        if (names.length === 0) {
+            return;
+        }
+
+        if (names.length !== expectedCount) {
+            throw new Error(
+                `Decision problem requires one ${fieldName} name per ${fieldName} when ${fieldName} names are provided.`,
+            );
+        }
+
+        for (const name of names) {
+            if (name.trim().length === 0) {
+                throw new Error(
+                    `Decision problem ${fieldName} names cannot be empty.`,
+                );
+            }
+        }
+    }
 
     public addToDebugBag(field: string, value: unknown): void {
         const debugBag = this.debugBag;
