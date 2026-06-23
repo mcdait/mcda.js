@@ -6,6 +6,31 @@ export enum CriterionType {
 export type DecisionMatrix = number[][];
 export type Scores = number[];
 
+export interface DecisionProblemInput {
+    weights: number[];
+    types: CriterionType[];
+    matrix: DecisionMatrix;
+    alternatives?: string[];
+    criteria?: string[];
+}
+
+export type DecisionProblemArrayInput = [
+    matrix: DecisionMatrix,
+    weights: number[],
+    types: CriterionType[],
+    alternatives?: string[],
+    criteria?: string[],
+];
+
+export type DecisionProblemSource =
+    | DecisionProblemInput
+    | DecisionProblemArrayInput;
+
+export interface DecisionProblemInputAdapter<TInput = unknown> {
+    supports(input: unknown): input is TInput;
+    normalize(input: TInput): DecisionProblemInput;
+}
+
 export interface MatrixInputInterface {
     get matrix(): DecisionMatrix;
     set matrix(matrix: DecisionMatrix);

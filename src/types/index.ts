@@ -2,6 +2,10 @@ export { CriterionType } from "./types.js";
 export type { DebugBag, DebuggableInterface } from "./debug.js";
 export type {
     DecisionMatrix,
+    DecisionProblemArrayInput,
+    DecisionProblemInputAdapter,
+    DecisionProblemInput,
+    DecisionProblemSource,
     Scores,
     AlternativesInputInterface,
     CriteriaInputInterface,

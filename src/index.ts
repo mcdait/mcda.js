@@ -4,23 +4,23 @@ import { CriterionType } from "./types/index.js";
 import { vectorNormalizationCallback } from "./utils/normalization.js";
 import { rank } from "./utils/ranking.js";
 
-const problem = new TopsisDecisionProblem();
+const problem = new TopsisDecisionProblem({
+    alternatives: ["Laptop A", "Laptop B", "Laptop C"],
+    criteria: ["Performance", "Battery", "Price"],
+    matrix: [
+        [8, 7, 1200],
+        [7, 9, 1000],
+        [9, 6, 1400],
+    ],
+    weights: [0.4, 0.35, 0.25],
+    types: [
+        CriterionType.BENEFIT,
+        CriterionType.BENEFIT,
+        CriterionType.COST,
+    ],
+});
 
 problem.enableDebug(true)
-
-problem.alternatives = ["Laptop A", "Laptop B", "Laptop C"];
-problem.criteria = ["Performance", "Battery", "Price"];
-problem.matrix = [
-    [8, 7, 1200],
-    [7, 9, 1000],
-    [9, 6, 1400],
-];
-problem.weights = [0.4, 0.35, 0.25];
-problem.types = [
-    CriterionType.BENEFIT,
-    CriterionType.BENEFIT,
-    CriterionType.COST,
-];
 problem.normalizationCallback = vectorNormalizationCallback;
 
 const scores = problem.scores;

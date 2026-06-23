@@ -5,11 +5,14 @@ import type {
     DebugBag,
     DebuggableInterface,
     DecisionMatrix,
+    DecisionProblemInput,
+    DecisionProblemInputAdapter,
     MatrixInputInterface,
     Scores,
     WeightsInputInterface,
 } from "../types/index.js";
 import type { CriterionType } from "../types/index.js";
+import { defaultDecisionProblemInputAdapters } from "../input/DecisionProblemInputAdapter.js";
 
 export abstract class AbstractDecisionProblem
     implements
@@ -26,6 +29,12 @@ export abstract class AbstractDecisionProblem
     protected _alternatives: string[] = [];
     protected _criteria: string[] = [];
     protected _debugBag: DebugBag | undefined = undefined;
+
+    public constructor(input?: unknown) {
+        if (input !== undefined) {
+            this.loadDecisionProblemInput(input);
+        }
+    }
 
     public get alternatives(): string[] {
         return this._alternatives;
@@ -144,5 +153,33 @@ export abstract class AbstractDecisionProblem
         if (debugBag !== undefined) {
             debugBag[field] = value;
         }
+    }
+
+    public loadDecisionProblemInput(input: unknown): void {
+        const normalizedInput = this.normalizeDecisionProblemInput(input);
+
+        this.weights = normalizedInput.weights;
+        this.types = normalizedInput.types;
+        this.matrix = normalizedInput.matrix;
+        this.alternatives = normalizedInput.alternatives ?? [];
+        this.criteria = normalizedInput.criteria ?? [];
+    }
+
+    protected getInputAdapters(): readonly DecisionProblemInputAdapter[] {
+        return defaultDecisionProblemInputAdapters;
+    }
+
+    private normalizeDecisionProblemInput(
+        input: unknown,
+    ): DecisionProblemInput {
+        const adapter = this.getInputAdapters().find((inputAdapter) =>
+            inputAdapter.supports(input),
+        );
+
+        if (adapter === undefined) {
+            throw new Error("Unsupported decision problem input format.");
+        }
+
+        return adapter.normalize(input);
     }
 }
