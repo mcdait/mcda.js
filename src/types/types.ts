@@ -4,36 +4,17 @@ export enum CriterionType {
 }
 
 export type DecisionMatrix = number[][];
+export type DecisionMatrixObject = Record<string, Record<string, number>>;
 export type Scores = number[];
-
-export interface DecisionProblemInput {
-    weights: number[];
-    types: CriterionType[];
-    matrix: DecisionMatrix;
-    alternatives?: string[];
-    criteria?: string[];
-}
-
-export type DecisionProblemArrayInput = [
-    matrix: DecisionMatrix,
-    weights: number[],
-    types: CriterionType[],
-    alternatives?: string[],
-    criteria?: string[],
-];
-
-export type DecisionProblemSource =
-    | DecisionProblemInput
-    | DecisionProblemArrayInput;
-
-export interface DecisionProblemInputAdapter<TInput = unknown> {
-    supports(input: unknown): input is TInput;
-    normalize(input: TInput): DecisionProblemInput;
-}
 
 export interface MatrixInputInterface {
     get matrix(): DecisionMatrix;
     set matrix(matrix: DecisionMatrix);
+}
+
+export interface MatrixObjectInputInterface {
+    get matrixObj(): DecisionMatrixObject;
+    set matrixObj(matrixObj: DecisionMatrixObject);
 }
 
 export interface WeightsInputInterface {

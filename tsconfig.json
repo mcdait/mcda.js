@@ -9,10 +9,17 @@
     "target": "esnext",
      "lib": ["esnext"],
      "types": ["node"],
+    "isolatedModules": true,
     // Other Outputs
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
     "strict": true,
-  }
+  },
+  "include": [
+    "src/**/*.ts"
+  ],
+  "exclude": [
+    "dist"
+  ]
 }

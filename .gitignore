@@ -1,4 +1,7 @@
-.nvmrc
-.idea
-dist
-node_modules
+.idea/
+dist/
+node_modules/
+tests/**/*.js
+tests/**/*.js.map
+tests/**/*.d.ts
+tests/**/*.d.ts.map

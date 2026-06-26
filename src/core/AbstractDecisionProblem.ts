@@ -5,14 +5,13 @@ import type {
     DebugBag,
     DebuggableInterface,
     DecisionMatrix,
-    DecisionProblemInput,
-    DecisionProblemInputAdapter,
+    DecisionMatrixObject,
     MatrixInputInterface,
+    MatrixObjectInputInterface,
     Scores,
     WeightsInputInterface,
 } from "../types/index.js";
 import type { CriterionType } from "../types/index.js";
-import { defaultDecisionProblemInputAdapters } from "../input/DecisionProblemInputAdapter.js";
 
 export abstract class AbstractDecisionProblem
     implements
@@ -21,6 +20,7 @@ export abstract class AbstractDecisionProblem
         WeightsInputInterface,
         CriteriaTypesInputInterface,
         MatrixInputInterface,
+        MatrixObjectInputInterface,
         DebuggableInterface
 {
     protected _weights: number[] = [];
@@ -29,12 +29,6 @@ export abstract class AbstractDecisionProblem
     protected _alternatives: string[] = [];
     protected _criteria: string[] = [];
     protected _debugBag: DebugBag | undefined = undefined;
-
-    public constructor(input?: unknown) {
-        if (input !== undefined) {
-            this.loadDecisionProblemInput(input);
-        }
-    }
 
     public get alternatives(): string[] {
         return this._alternatives;
@@ -74,6 +68,54 @@ export abstract class AbstractDecisionProblem
 
     public set matrix(matrix: DecisionMatrix) {
         this._matrix = matrix;
+    }
+
+    public get matrixObj(): DecisionMatrixObject {
+        return Object.fromEntries(
+            this.alternatives.map((alternative, alternativeIndex) => [
+                alternative,
+                Object.fromEntries(
+                    this.criteria.map((criterion, criterionIndex) => [
+                        criterion,
+                        this.matrix[alternativeIndex]?.[criterionIndex] ?? 0,
+                    ]),
+                ),
+            ]),
+        );
+    }
+
+    public set matrixObj(matrixObj: DecisionMatrixObject) {
+        const alternatives = Object.keys(matrixObj);
+        const criteria = Object.keys(matrixObj[alternatives[0] ?? ""] ?? {});
+
+        if (criteria.length === 0) {
+            throw new Error(
+                "Decision problem matrix object requires at least one criterion.",
+            );
+        }
+
+        for (const alternative of alternatives) {
+            const alternativeCriteria = Object.keys(matrixObj[alternative] ?? {});
+            const hasSameCriteria =
+                alternativeCriteria.length === criteria.length &&
+                criteria.every((criterion) =>
+                    alternativeCriteria.includes(criterion),
+                );
+
+            if (!hasSameCriteria) {
+                throw new Error(
+                    "Decision problem matrix object alternatives must contain the same criteria.",
+                );
+            }
+        }
+
+        this.alternatives = alternatives;
+        this.criteria = criteria;
+        this.matrix = alternatives.map((alternative) => {
+            const criteriaValues = matrixObj[alternative];
+
+            return criteria.map((criterion) => criteriaValues[criterion]);
+        });
     }
 
     public get debugBag(): DebugBag | undefined {
@@ -153,33 +195,5 @@ export abstract class AbstractDecisionProblem
         if (debugBag !== undefined) {
             debugBag[field] = value;
         }
-    }
-
-    public loadDecisionProblemInput(input: unknown): void {
-        const normalizedInput = this.normalizeDecisionProblemInput(input);
-
-        this.weights = normalizedInput.weights;
-        this.types = normalizedInput.types;
-        this.matrix = normalizedInput.matrix;
-        this.alternatives = normalizedInput.alternatives ?? [];
-        this.criteria = normalizedInput.criteria ?? [];
-    }
-
-    protected getInputAdapters(): readonly DecisionProblemInputAdapter[] {
-        return defaultDecisionProblemInputAdapters;
-    }
-
-    private normalizeDecisionProblemInput(
-        input: unknown,
-    ): DecisionProblemInput {
-        const adapter = this.getInputAdapters().find((inputAdapter) =>
-            inputAdapter.supports(input),
-        );
-
-        if (adapter === undefined) {
-            throw new Error("Unsupported decision problem input format.");
-        }
-
-        return adapter.normalize(input);
     }
 }
