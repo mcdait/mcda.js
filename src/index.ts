@@ -2,6 +2,7 @@ import { PrometheeDecisionProblem } from "./core/PrometheeDecisionProblem.js";
 import { TopsisDecisionProblem } from "./core/TopsisDecisionProblem.js";
 import { CriterionType } from "./types/index.js";
 import { vectorNormalizationCallback } from "./utils/normalization.js";
+import { usualPreference } from "./utils/prometheePreferenceFunctions.js";
 import { rank } from "./utils/ranking.js";
 const problem = new TopsisDecisionProblem();
 
@@ -43,25 +44,42 @@ for (const result of ranking) {
 console.log('TOPSIS debug bag:');
 console.debug(problem.debugBag)
 
-// const prometheeProblem = new PrometheeDecisionProblem();
-//
-// prometheeProblem.alternatives = problem.alternatives;
-// prometheeProblem.criteria = problem.criteria;
-// prometheeProblem.matrix = problem.matrix;
-// prometheeProblem.weights = problem.weights;
-// prometheeProblem.types = problem.types;
-// prometheeProblem.normalizationCallback = vectorNormalizationCallback;
-//
-// const prometheeScores = prometheeProblem.scores;
-// const prometheeRanking = prometheeScores
-//     .map((score, index) => ({
-//         alternative: prometheeProblem.alternatives[index],
-//         score,
-//     }))
-//     .sort((left, right) => right.score - left.score);
-//
-// console.log("PROMETHEE scores:");
-//
-// for (const result of prometheeRanking) {
-//     console.log(`${result.alternative}: ${result.score.toFixed(4)}`);
-// }
+const prometheeProblem = new PrometheeDecisionProblem();
+
+prometheeProblem.alternatives = ["A1", "A2", "A3", "A4"];
+prometheeProblem.criteria = ["C1", "C2", "C3"];
+prometheeProblem.matrix = [
+    [4, 4, 0.2],
+    [1, 5, 0.5],
+    [3, 2, 0.3],
+    [4, 3, 0.5],
+];
+prometheeProblem.weights = [0.3, 0.5, 0.2];
+prometheeProblem.types = [
+    CriterionType.BENEFIT,
+    CriterionType.COST,
+    CriterionType.BENEFIT,
+];
+prometheeProblem.preferenceFunctions = [
+    usualPreference,
+    usualPreference,
+    usualPreference,
+];
+
+const prometheeScores = prometheeProblem.scores;
+const prometheeRanks = rank(prometheeScores);
+const prometheeRanking = prometheeScores
+    .map((score, index) => ({
+        alternative: prometheeProblem.alternatives[index],
+        rank: prometheeRanks[index],
+        score,
+    }))
+    .sort((left, right) => right.score - left.score);
+
+console.log("PROMETHEE II scores:");
+
+for (const result of prometheeRanking) {
+    console.log(
+        `${result.alternative}: score=${result.score}, rank=${result.rank}`,
+    );
+}

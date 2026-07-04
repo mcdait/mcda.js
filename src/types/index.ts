@@ -15,3 +15,7 @@ export type {
     ConfigurableNormalizationInterface,
     NormalizationCallback,
 } from "./normalization.js";
+export type {
+    ConfigurablePreferenceFunctionsInterface,
+    PreferenceFunction,
+} from "./promethee.js";

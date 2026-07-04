@@ -2,24 +2,37 @@ import { CriterionType } from "../types/index.js";
 import type {
     DecisionMatrix,
     Scores,
+    ConfigurablePreferenceFunctionsInterface,
+    PreferenceFunction,
 } from "../types/index.js";
-import {AbstractNormalizedDecisionProblem} from "./AbstractNormalizedDecisionProblem.js";
+import {AbstractDecisionProblem} from "./AbstractDecisionProblem.js";
 
 export class PrometheeDecisionProblem
-    extends AbstractNormalizedDecisionProblem
+    extends AbstractDecisionProblem
+    implements ConfigurablePreferenceFunctionsInterface
 {
+    protected _preferenceFunctions: PreferenceFunction[] = [];
+
+    public get preferenceFunctions(): PreferenceFunction[] {
+        return this._preferenceFunctions;
+    }
+
+    public set preferenceFunctions(preferenceFunctions: PreferenceFunction[]) {
+        this._preferenceFunctions = preferenceFunctions;
+    }
+
     public override get scores(): Scores {
         this.validate();
         return this.promethee();
     }
 
-    private promethee(): Scores {
-        if (this.normalizationCallback === undefined) {
-            throw new Error("PROMETHEE requires a normalization callback.");
-        }
+    protected override validate(): void {
+        super.validate();
+        this.validatePreferenceFunctions();
+    }
 
-        const normalizedMatrix = this.normalizationCallback(this.matrix);
-        const preferenceMatrix = this.getPreferenceMatrix(normalizedMatrix);
+    private promethee(): Scores {
+        const preferenceMatrix = this.getPreferenceMatrix(this.matrix);
         const positiveFlows = this.getPositiveFlows(preferenceMatrix);
         const negativeFlows = this.getNegativeFlows(preferenceMatrix);
 
@@ -57,10 +70,37 @@ export class PrometheeDecisionProblem
                 type === CriterionType.BENEFIT
                     ? leftValue - rightValue
                     : rightValue - leftValue;
-            const preference = difference > 0 ? difference : 0;
+            const preferenceFunction = this.preferenceFunctions[criterionIndex];
+            const preference = this.getCriterionPreference(
+                difference,
+                preferenceFunction,
+            );
 
             return sum + weight * preference;
         }, 0);
+    }
+
+    private getCriterionPreference(
+        difference: number,
+        preferenceFunction: PreferenceFunction | undefined,
+    ): number {
+        if (preferenceFunction === undefined) {
+            throw new Error("PROMETHEE preference function is required.");
+        }
+
+        const preference = preferenceFunction(difference);
+
+        if (
+            !Number.isFinite(preference) ||
+            preference < 0 ||
+            preference > 1
+        ) {
+            throw new Error(
+                "PROMETHEE preference function must return a finite number between 0 and 1.",
+            );
+        }
+
+        return preference;
     }
 
     private getPositiveFlows(preferenceMatrix: DecisionMatrix): number[] {
@@ -87,4 +127,19 @@ export class PrometheeDecisionProblem
         return sum / (values.length - 1);
     }
 
+    private validatePreferenceFunctions(): void {
+        if (this.preferenceFunctions.length !== this.weights.length) {
+            throw new Error(
+                "PROMETHEE requires one preference function per weight.",
+            );
+        }
+
+        for (const preferenceFunction of this.preferenceFunctions) {
+            if (typeof preferenceFunction !== "function") {
+                throw new Error(
+                    "PROMETHEE preference functions must be callable.",
+                );
+            }
+        }
+    }
 }
