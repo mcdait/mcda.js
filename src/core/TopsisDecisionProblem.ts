@@ -48,8 +48,8 @@ export class TopsisDecisionProblem
     }
 
     private applyWeights(matrix: DecisionMatrix): DecisionMatrix {
-        return matrix.map((row) =>
-            row.map((value, criterionIndex) => {
+        return matrix.map((alternativeValues) =>
+            alternativeValues.map((value, criterionIndex) => {
                 const weight = this.weights[criterionIndex] ?? 0;
 
                 return value * weight;
@@ -62,24 +62,35 @@ export class TopsisDecisionProblem
         bestValues: boolean,
     ): number[] {
         return this.weights.map((_, criterionIndex) => {
-            const values = matrix.map((row) => row[criterionIndex] ?? 0);
-            const type = this.types[criterionIndex];
+            const criterionValues = matrix.map(
+                (alternativeValues) =>
+                    alternativeValues[criterionIndex] ?? 0,
+            );
+            const criterionType = this.types[criterionIndex];
             const benefitValue = bestValues ? Math.max : Math.min;
             const costValue = bestValues ? Math.min : Math.max;
             const picker =
-                type === CriterionType.BENEFIT ? benefitValue : costValue;
+                criterionType === CriterionType.BENEFIT
+                    ? benefitValue
+                    : costValue;
 
-            return picker(...values);
+            return picker(...criterionValues);
         });
     }
 
-    private getDistances(matrix: DecisionMatrix, ideal: number[]): number[] {
-        return matrix.map((row) => {
-            const sumOfSquares = row.reduce((sum, value, criterionIndex) => {
-                const idealValue = ideal[criterionIndex] ?? 0;
+    private getDistances(
+        matrix: DecisionMatrix,
+        idealValues: number[],
+    ): number[] {
+        return matrix.map((alternativeValues) => {
+            const sumOfSquares = alternativeValues.reduce(
+                (sum, value, criterionIndex) => {
+                    const idealValue = idealValues[criterionIndex] ?? 0;
 
-                return sum + (value - idealValue) ** 2;
-            }, 0);
+                    return sum + (value - idealValue) ** 2;
+                },
+                0,
+            );
 
             return Math.sqrt(sumOfSquares);
         });

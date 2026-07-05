@@ -65,9 +65,9 @@ export class PrometheeDecisionProblem
         return this.weights.reduce((sum, weight, criterionIndex) => {
             const leftValue = leftAlternative[criterionIndex] ?? 0;
             const rightValue = rightAlternative[criterionIndex] ?? 0;
-            const type = this.types[criterionIndex];
+            const criterionType = this.types[criterionIndex];
             const difference =
-                type === CriterionType.BENEFIT
+                criterionType === CriterionType.BENEFIT
                     ? leftValue - rightValue
                     : rightValue - leftValue;
             const preferenceFunction = this.preferenceFunctions[criterionIndex];
@@ -104,16 +104,19 @@ export class PrometheeDecisionProblem
     }
 
     private getPositiveFlows(preferenceMatrix: DecisionMatrix): number[] {
-        return preferenceMatrix.map((row) => this.getAverage(row));
+        return preferenceMatrix.map((preferenceValues) =>
+            this.getAverage(preferenceValues),
+        );
     }
 
     private getNegativeFlows(preferenceMatrix: DecisionMatrix): number[] {
         return preferenceMatrix.map((_, alternativeIndex) => {
-            const column = preferenceMatrix.map(
-                (row) => row[alternativeIndex] ?? 0,
+            const incomingPreferences = preferenceMatrix.map(
+                (preferenceValues) =>
+                    preferenceValues[alternativeIndex] ?? 0,
             );
 
-            return this.getAverage(column);
+            return this.getAverage(incomingPreferences);
         });
     }
 

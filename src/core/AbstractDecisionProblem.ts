@@ -145,8 +145,8 @@ export abstract class AbstractDecisionProblem
             throw new Error("Decision problem requires at least one alternative.");
         }
 
-        for (const row of this.matrix) {
-            if (row.length !== criteriaCount) {
+        for (const alternativeValues of this.matrix) {
+            if (alternativeValues.length !== criteriaCount) {
                 throw new Error(
                     "Decision problem matrix rows must match the weights length.",
                 );
