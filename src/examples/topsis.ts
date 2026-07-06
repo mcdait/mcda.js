@@ -1,5 +1,9 @@
 import { TopsisDecisionProblem } from "../core/TopsisDecisionProblem.js";
 import { CriterionType } from "../types/index.js";
+import {
+    printMatrixComparison,
+    printVectorComparison,
+} from "../utils/comparisonTables.js";
 import { vectorNormalizationCallback } from "../utils/normalization.js";
 import { rank } from "../utils/ranking.js";
 
@@ -86,94 +90,23 @@ const ranking = problem.alternatives
     }))
     .sort((first, second) => first.rank - second.rank);
 
-function formatDifference(
-    calculated: number,
-    published: number,
-    decimalPlaces: number,
-): string {
-    const roundedCalculated = Number(calculated.toFixed(decimalPlaces));
-    const roundedPublished = Number(published.toFixed(decimalPlaces));
-    const difference = roundedCalculated - roundedPublished;
-
-    if (difference === 0) {
-        return "-";
-    }
-
-    const sign = difference > 0 ? "+" : "";
-
-    return `${sign}${difference.toFixed(decimalPlaces)}`;
-}
-
-function printMatrixComparison(
-    label: string,
-    calculated: number[][],
-    published: number[][],
-): void {
-    console.log(label);
-    console.table(
-        problem.alternatives.map((alternative, index) => {
-            const calculatedRow = calculated[index] ?? [];
-            const publishedRow = published[index] ?? [];
-            const differences = problem.criteria
-                .map((criterion, criterionIndex) => {
-                    const difference = formatDifference(
-                        calculatedRow[criterionIndex] ?? 0,
-                        publishedRow[criterionIndex] ?? 0,
-                        4,
-                    );
-
-                    return difference === "-"
-                        ? undefined
-                        : `${criterion}: ${difference}`;
-                })
-                .filter((difference) => difference !== undefined);
-
-            return {
-                alternative,
-                calculated: calculatedRow
-                    .map((value) => value.toFixed(4))
-                    .join(", "),
-                pdf: publishedRow
-                    .map((value) => value.toFixed(4))
-                    .join(", "),
-                differences:
-                    differences.length === 0 ? "-" : differences.join(", "),
-            };
-        }),
-    );
-}
-
-function printVectorComparison(
-    label: string,
-    names: string[],
-    calculated: number[],
-    published: number[],
-    decimalPlaces = 4,
-): void {
-    console.log(label);
-    console.table(
-        names.map((name, index) => ({
-            name,
-            calculated: calculated[index]?.toFixed(decimalPlaces),
-            pdf: published[index]?.toFixed(decimalPlaces),
-            difference: formatDifference(
-                calculated[index] ?? 0,
-                published[index] ?? 0,
-                decimalPlaces,
-            ),
-        })),
-    );
-}
-
 printMatrixComparison(
     "Normalized decision matrix",
+    problem.alternatives,
+    problem.criteria,
     debugResults.normalizedMatrix,
     pdfResults.normalizedMatrix,
+    4,
+    "alternative",
 );
 printMatrixComparison(
     "Weighted normalized decision matrix",
+    problem.alternatives,
+    problem.criteria,
     debugResults.weightedNormalizedMatrix,
     pdfResults.weightedNormalizedMatrix,
+    4,
+    "alternative",
 );
 printVectorComparison(
     "Ideal best",

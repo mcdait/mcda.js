@@ -33,14 +33,22 @@ export class PrometheeDecisionProblem
 
     private promethee(): Scores {
         const preferenceMatrix = this.getPreferenceMatrix(this.matrix);
-        const positiveFlows = this.getPositiveFlows(preferenceMatrix);
-        const negativeFlows = this.getNegativeFlows(preferenceMatrix);
+        this.addToDebugBag("preferenceMatrix", preferenceMatrix);
 
-        return positiveFlows.map((positiveFlow, alternativeIndex) => {
+        const positiveFlows = this.getPositiveFlows(preferenceMatrix);
+        this.addToDebugBag("positiveFlows", positiveFlows);
+
+        const negativeFlows = this.getNegativeFlows(preferenceMatrix);
+        this.addToDebugBag("negativeFlows", negativeFlows);
+
+        const netFlows = positiveFlows.map((positiveFlow, alternativeIndex) => {
             const negativeFlow = negativeFlows[alternativeIndex] ?? 0;
 
             return positiveFlow - negativeFlow;
         });
+        this.addToDebugBag("netFlows", netFlows);
+
+        return netFlows;
     }
 
     private getPreferenceMatrix(matrix: DecisionMatrix): DecisionMatrix {

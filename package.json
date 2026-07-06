@@ -9,7 +9,8 @@
     "dev": "tsc && node dist/index.js",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "example:topsis": "tsc && node dist/examples/topsis.js"
+    "example:topsis": "tsc && node dist/examples/topsis.js",
+    "example:promethee": "tsc && node dist/examples/promethee.js"
   },
   "keywords": [],
   "author": "",
