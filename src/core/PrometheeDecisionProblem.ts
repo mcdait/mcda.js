@@ -1,156 +1,132 @@
 import { CriterionType } from "../types/index.js";
 import type {
-    DecisionMatrix,
-    Scores,
-    ConfigurablePreferenceFunctionsInterface,
-    PreferenceFunction,
+  DecisionMatrix,
+  Scores,
+  ConfigurablePreferenceFunctionsInterface,
+  PreferenceFunction,
 } from "../types/index.js";
-import {AbstractDecisionProblem} from "./AbstractDecisionProblem.js";
+import { AbstractDecisionProblem } from "./AbstractDecisionProblem.js";
 
 export class PrometheeDecisionProblem
-    extends AbstractDecisionProblem
-    implements ConfigurablePreferenceFunctionsInterface
+  extends AbstractDecisionProblem
+  implements ConfigurablePreferenceFunctionsInterface
 {
-    protected _preferenceFunctions: PreferenceFunction[] = [];
+  protected _preferenceFunctions: PreferenceFunction[] = [];
 
-    public get preferenceFunctions(): PreferenceFunction[] {
-        return this._preferenceFunctions;
-    }
+  public get preferenceFunctions(): PreferenceFunction[] {
+    return this._preferenceFunctions;
+  }
 
-    public set preferenceFunctions(preferenceFunctions: PreferenceFunction[]) {
-        this._preferenceFunctions = preferenceFunctions;
-    }
+  public set preferenceFunctions(preferenceFunctions: PreferenceFunction[]) {
+    this._preferenceFunctions = preferenceFunctions;
+  }
 
-    public override get scores(): Scores {
-        this.validate();
-        return this.promethee();
-    }
+  public override get scores(): Scores {
+    this.validate();
+    return this.promethee();
+  }
 
-    protected override validate(): void {
-        super.validate();
-        this.validatePreferenceFunctions();
-    }
+  protected override validate(): void {
+    super.validate();
+    this.validatePreferenceFunctions();
+  }
 
-    private promethee(): Scores {
-        const preferenceMatrix = this.getPreferenceMatrix(this.matrix);
-        this.addToDebugBag("preferenceMatrix", preferenceMatrix);
+  private promethee(): Scores {
+    const preferenceMatrix = this.getPreferenceMatrix(this.matrix);
+    this.addToDebugBag("preferenceMatrix", preferenceMatrix);
 
-        const positiveFlows = this.getPositiveFlows(preferenceMatrix);
-        this.addToDebugBag("positiveFlows", positiveFlows);
+    const positiveFlows = this.getPositiveFlows(preferenceMatrix);
+    this.addToDebugBag("positiveFlows", positiveFlows);
 
-        const negativeFlows = this.getNegativeFlows(preferenceMatrix);
-        this.addToDebugBag("negativeFlows", negativeFlows);
+    const negativeFlows = this.getNegativeFlows(preferenceMatrix);
+    this.addToDebugBag("negativeFlows", negativeFlows);
 
-        const netFlows = positiveFlows.map((positiveFlow, alternativeIndex) => {
-            const negativeFlow = negativeFlows[alternativeIndex] ?? 0;
+    const netFlows = positiveFlows.map((positiveFlow, alternativeIndex) => {
+      const negativeFlow = negativeFlows[alternativeIndex] ?? 0;
 
-            return positiveFlow - negativeFlow;
-        });
-        this.addToDebugBag("netFlows", netFlows);
+      return positiveFlow - negativeFlow;
+    });
+    this.addToDebugBag("netFlows", netFlows);
 
-        return netFlows;
-    }
+    return netFlows;
+  }
 
-    private getPreferenceMatrix(matrix: DecisionMatrix): DecisionMatrix {
-        return matrix.map((leftAlternative, leftIndex) =>
-            matrix.map((rightAlternative, rightIndex) => {
-                if (leftIndex === rightIndex) {
-                    return 0;
-                }
-
-                return this.getPreferenceDegree(
-                    leftAlternative,
-                    rightAlternative,
-                );
-            }),
-        );
-    }
-
-    private getPreferenceDegree(
-        leftAlternative: number[],
-        rightAlternative: number[],
-    ): number {
-        return this.weights.reduce((sum, weight, criterionIndex) => {
-            const leftValue = leftAlternative[criterionIndex] ?? 0;
-            const rightValue = rightAlternative[criterionIndex] ?? 0;
-            const criterionType = this.types[criterionIndex];
-            const difference =
-                criterionType === CriterionType.BENEFIT
-                    ? leftValue - rightValue
-                    : rightValue - leftValue;
-            const preferenceFunction = this.preferenceFunctions[criterionIndex];
-            const preference = this.getCriterionPreference(
-                difference,
-                preferenceFunction,
-            );
-
-            return sum + weight * preference;
-        }, 0);
-    }
-
-    private getCriterionPreference(
-        difference: number,
-        preferenceFunction: PreferenceFunction | undefined,
-    ): number {
-        if (preferenceFunction === undefined) {
-            throw new Error("PROMETHEE preference function is required.");
+  private getPreferenceMatrix(matrix: DecisionMatrix): DecisionMatrix {
+    return matrix.map((leftAlternative, leftIndex) =>
+      matrix.map((rightAlternative, rightIndex) => {
+        if (leftIndex === rightIndex) {
+          return 0;
         }
 
-        const preference = preferenceFunction(difference);
+        return this.getPreferenceDegree(leftAlternative, rightAlternative);
+      }),
+    );
+  }
 
-        if (
-            !Number.isFinite(preference) ||
-            preference < 0 ||
-            preference > 1
-        ) {
-            throw new Error(
-                "PROMETHEE preference function must return a finite number between 0 and 1.",
-            );
-        }
+  private getPreferenceDegree(leftAlternative: number[], rightAlternative: number[]): number {
+    return this.weights.reduce((sum, weight, criterionIndex) => {
+      const leftValue = leftAlternative[criterionIndex] ?? 0;
+      const rightValue = rightAlternative[criterionIndex] ?? 0;
+      const criterionType = this.types[criterionIndex];
+      const difference =
+        criterionType === CriterionType.BENEFIT ? leftValue - rightValue : rightValue - leftValue;
+      const preferenceFunction = this.preferenceFunctions[criterionIndex];
+      const preference = this.getCriterionPreference(difference, preferenceFunction);
 
-        return preference;
+      return sum + weight * preference;
+    }, 0);
+  }
+
+  private getCriterionPreference(
+    difference: number,
+    preferenceFunction: PreferenceFunction | undefined,
+  ): number {
+    if (preferenceFunction === undefined) {
+      throw new Error("PROMETHEE preference function is required.");
     }
 
-    private getPositiveFlows(preferenceMatrix: DecisionMatrix): number[] {
-        return preferenceMatrix.map((preferenceValues) =>
-            this.getAverage(preferenceValues),
-        );
+    const preference = preferenceFunction(difference);
+
+    if (!Number.isFinite(preference) || preference < 0 || preference > 1) {
+      throw new Error("PROMETHEE preference function must return a finite number between 0 and 1.");
     }
 
-    private getNegativeFlows(preferenceMatrix: DecisionMatrix): number[] {
-        return preferenceMatrix.map((_, alternativeIndex) => {
-            const incomingPreferences = preferenceMatrix.map(
-                (preferenceValues) =>
-                    preferenceValues[alternativeIndex] ?? 0,
-            );
+    return preference;
+  }
 
-            return this.getAverage(incomingPreferences);
-        });
+  private getPositiveFlows(preferenceMatrix: DecisionMatrix): number[] {
+    return preferenceMatrix.map((preferenceValues) => this.getAverage(preferenceValues));
+  }
+
+  private getNegativeFlows(preferenceMatrix: DecisionMatrix): number[] {
+    return preferenceMatrix.map((_, alternativeIndex) => {
+      const incomingPreferences = preferenceMatrix.map(
+        (preferenceValues) => preferenceValues[alternativeIndex] ?? 0,
+      );
+
+      return this.getAverage(incomingPreferences);
+    });
+  }
+
+  private getAverage(values: number[]): number {
+    if (values.length <= 1) {
+      return 0;
     }
 
-    private getAverage(values: number[]): number {
-        if (values.length <= 1) {
-            return 0;
-        }
+    const sum = values.reduce((total, value) => total + value, 0);
 
-        const sum = values.reduce((total, value) => total + value, 0);
+    return sum / (values.length - 1);
+  }
 
-        return sum / (values.length - 1);
+  private validatePreferenceFunctions(): void {
+    if (this.preferenceFunctions.length !== this.weights.length) {
+      throw new Error("PROMETHEE requires one preference function per weight.");
     }
 
-    private validatePreferenceFunctions(): void {
-        if (this.preferenceFunctions.length !== this.weights.length) {
-            throw new Error(
-                "PROMETHEE requires one preference function per weight.",
-            );
-        }
-
-        for (const preferenceFunction of this.preferenceFunctions) {
-            if (typeof preferenceFunction !== "function") {
-                throw new Error(
-                    "PROMETHEE preference functions must be callable.",
-                );
-            }
-        }
+    for (const preferenceFunction of this.preferenceFunctions) {
+      if (typeof preferenceFunction !== "function") {
+        throw new Error("PROMETHEE preference functions must be callable.");
+      }
     }
+  }
 }
