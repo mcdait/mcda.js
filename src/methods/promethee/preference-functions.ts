@@ -1,4 +1,4 @@
-import type { PreferenceFunction } from "../types/index.js";
+import { PreferenceFunction } from "./types";
 
 export const usualPreference: PreferenceFunction = (difference) => (difference <= 0 ? 0 : 1);
 

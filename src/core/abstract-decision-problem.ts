@@ -10,8 +10,8 @@ import type {
   MatrixObjectInputInterface,
   Scores,
   WeightsInputInterface,
-} from "../types/index.js";
-import type { CriterionType } from "../types/index.js";
+  CriterionType,
+} from "../types";
 
 export abstract class AbstractDecisionProblem
   implements

@@ -1,8 +1,8 @@
 import { describe, expect, test } from "@jest/globals";
-import { TopsisDecisionProblem } from "../../../src/core/TopsisDecisionProblem.js";
-import { CriterionType } from "../../../src/types/index.js";
-import type { DecisionMatrix } from "../../../src/types/index.js";
-import { vectorNormalizationCallback } from "../../../src/utils/normalization.js";
+import { CriterionType } from "../../../src/types";
+import type { DecisionMatrix } from "../../../src/types";
+import { vectorNormalizationCallback } from "../../../src/utils/normalization";
+import { TopsisDecisionProblem } from "../../../src/methods/topsis";
 
 const matrix: DecisionMatrix = [
   [8, 7, 1200],

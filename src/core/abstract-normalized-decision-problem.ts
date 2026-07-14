@@ -1,5 +1,5 @@
-import { AbstractDecisionProblem } from "./AbstractDecisionProblem.js";
-import type { ConfigurableNormalizationInterface, NormalizationCallback } from "../types/index.js";
+import { AbstractDecisionProblem } from "./abstract-decision-problem";
+import { ConfigurableNormalizationInterface, NormalizationCallback } from "../types/core";
 
 export abstract class AbstractNormalizedDecisionProblem
   extends AbstractDecisionProblem

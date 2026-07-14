@@ -1,11 +1,11 @@
 import { describe, expect, test } from "@jest/globals";
-import { PrometheeDecisionProblem } from "../../../src/core/PrometheeDecisionProblem.js";
-import { CriterionType } from "../../../src/types/index.js";
-import type { PreferenceFunction } from "../../../src/types/index.js";
+import { CriterionType } from "../../../src/types";
 import {
   linearPreference,
+  PrometheeDecisionProblem,
   usualPreference,
-} from "../../../src/utils/prometheePreferenceFunctions.js";
+} from "../../../src/methods/promethee";
+import { PreferenceFunction } from "../../../src/methods/promethee/types";
 
 function createPrometheeProblem(): PrometheeDecisionProblem {
   const problem = new PrometheeDecisionProblem();

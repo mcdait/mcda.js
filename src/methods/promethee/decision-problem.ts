@@ -1,11 +1,7 @@
-import { CriterionType } from "../types/index.js";
-import type {
-  DecisionMatrix,
-  Scores,
-  ConfigurablePreferenceFunctionsInterface,
-  PreferenceFunction,
-} from "../types/index.js";
-import { AbstractDecisionProblem } from "./AbstractDecisionProblem.js";
+import { CriterionType } from "../../types";
+import type { DecisionMatrix, Scores } from "../../types";
+import { AbstractDecisionProblem } from "../../core";
+import { ConfigurablePreferenceFunctionsInterface, PreferenceFunction } from "./types";
 
 export class PrometheeDecisionProblem
   extends AbstractDecisionProblem

@@ -1,5 +1,4 @@
 import { describe, expect, test } from "@jest/globals";
-import type { PreferenceFunction } from "../../../src/types/index.js";
 import {
   gaussianPreference,
   levelPreference,
@@ -7,7 +6,8 @@ import {
   usualPreference,
   uShapePreference,
   vShapePreference,
-} from "../../../src/utils/prometheePreferenceFunctions.js";
+} from "../../../src/methods/promethee";
+import { PreferenceFunction } from "../../../src/methods/promethee/types";
 
 const preferenceCases: Array<[string, PreferenceFunction, number]> = [
   ["usual", usualPreference, 1],

@@ -1,7 +1,7 @@
 import { describe, expect, test } from "@jest/globals";
-import { AbstractDecisionProblem } from "../../../src/core/AbstractDecisionProblem.js";
-import { CriterionType } from "../../../src/types/index.js";
-import type { DecisionMatrix, Scores } from "../../../src/types/index.js";
+import { AbstractDecisionProblem } from "../../src/core";
+import { CriterionType } from "../../src/types";
+import type { DecisionMatrix, Scores } from "../../src/types";
 
 const matrix: DecisionMatrix = [
   [8, 7, 1200],
