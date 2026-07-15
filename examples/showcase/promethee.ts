@@ -1,9 +1,3 @@
-import { PrometheeDecisionProblem } from "../core/PrometheeDecisionProblem.js";
-import { CriterionType } from "../types/index.js";
-import { printVectorComparison } from "../utils/comparisonTables.js";
-import { vShapePreference } from "../utils/prometheePreferenceFunctions.js";
-import { rank } from "../utils/ranking.js";
-
 /**
  * PROMETHEE II published offshore wind farm location example
  *
@@ -16,6 +10,8 @@ import { rank } from "../utils/ranking.js";
  * Table 5: decision matrix
  * Table 6: expected PROMETHEE II net flows and ranks
  */
+import { CriterionType, PrometheeDecisionProblem, rank, vShapePreference } from "mcdajs";
+import { printVectorComparison } from "./comparisonTables";
 
 type PrometheeDebugResults = {
   preferenceMatrix: number[][];

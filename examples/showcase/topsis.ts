@@ -1,8 +1,5 @@
-import { TopsisDecisionProblem } from "../core/TopsisDecisionProblem.js";
-import { CriterionType } from "../types/index.js";
-import { printMatrixComparison, printVectorComparison } from "../utils/comparisonTables.js";
-import { vectorNormalizationCallback } from "../utils/normalization.js";
-import { rank } from "../utils/ranking.js";
+import { CriterionType, rank, TopsisDecisionProblem, vectorNormalizationCallback } from "mcdajs";
+import { printMatrixComparison, printVectorComparison } from "./comparisonTables";
 
 /**
  * Fighter aircraft selection problem
