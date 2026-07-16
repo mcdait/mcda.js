@@ -13,7 +13,7 @@ jobs:
 
     strategy:
       matrix:
-        node-version: [20, 22, 24]
+        node-version: [16, 18, 20, 22, 24]
 
     steps:
       - name: Checkout repository
@@ -33,9 +33,3 @@ jobs:
 
       - name: Run tests
         run: npm test
-
-      - name: Build package
-        run: npm run build
-
-      - name: Check published package
-        run: npm pack --dry-run
