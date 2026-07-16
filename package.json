@@ -1,31 +1,64 @@
 {
-  "name": "mcda",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "mcdajs",
+  "version": "0.0.2",
+  "description": "Multiple Criteria Decision Analysis library for JavaScript and TypeScript",
+  "main": "./dist/index.cjs",
   "scripts": {
-    "build": "tsc",
+    "build": "tsdown",
+    "dev": "tsdown --watch",
     "start": "node dist/index.js",
-    "dev": "tsc && node dist/index.js",
     "test": "jest",
     "typecheck": "tsc --noEmit",
     "example:topsis": "tsc && node dist/examples/topsis.js",
     "example:promethee": "tsc && node dist/examples/promethee.js",
     "prettier": "prettier . --write"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
+  "keywords": [
+    "mcda",
+    "mcdm",
+    "decision-making",
+    "topsis",
+    "promethee",
+    "multi-criteria",
+    "optimization"
+  ],
+  "author": "MCDA.it",
+  "license": "MIT",
   "type": "module",
   "engines": {
-    "node": "24.12.0"
+    "node": ">=20"
   },
   "devDependencies": {
+    "@arethetypeswrong/core": "^0.18.5",
     "@types/jest": "^30.0.0",
     "@types/node": "^25.9.3",
     "jest": "^30.4.2",
     "prettier": "^3.9.4",
+    "publint": "^0.3.21",
     "ts-jest": "^29.4.11",
+    "tsdown": "^0.22.2",
     "typescript": "^6.0.3"
+  },
+  "types": "./dist/index.d.cts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "module": "./dist/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcdait/mcda.js.git"
+  },
+  "homepage": "https://github.com/mcdait/mcda.js",
+  "bugs": {
+    "url": "https://github.com/mcdait/mcda.js/issues"
   }
 }
