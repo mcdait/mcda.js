@@ -1,6 +1,6 @@
 {
   "name": "mcdajs",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Multiple Criteria Decision Analysis library for JavaScript and TypeScript",
   "main": "./dist/index.cjs",
   "scripts": {

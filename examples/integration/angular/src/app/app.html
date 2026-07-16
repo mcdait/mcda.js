@@ -1,0 +1,39 @@
+<h1>MCDA.js Angular Example (TOPSIS)</h1>
+
+<p>Every matrix modification immediately recomputes the TOPSIS ranking.</p>
+
+<table>
+  <thead>
+    <tr>
+      <th></th>
+      <th>C1 (max)</th>
+      <th>C2 (min)</th>
+      <th>C3 (max)</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    @for (row of matrix; track $index; let rowIndex = $index) {
+      <tr>
+        <th>A{{ rowIndex + 1 }}</th>
+
+        @for (value of row; track $index; let columnIndex = $index) {
+          <td>
+            <input type="number" [(ngModel)]="matrix[rowIndex][columnIndex]" (input)="compute()" />
+          </td>
+        }
+      </tr>
+    }
+  </tbody>
+</table>
+
+<h2>TOPSIS Ranking</h2>
+
+<ol>
+  @for (item of result; track item.alternative) {
+    <li>
+      {{ item.alternative }}:
+      {{ item.score.toFixed(6) }}
+    </li>
+  }
+</ol>

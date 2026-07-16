@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "mcdajs": "^0.0.2",
+    "tsx": "^4.23.1"
+  },
+  "scripts": {
+    "start": "tsx index.ts"
+  }
+}
