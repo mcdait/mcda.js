@@ -6,11 +6,8 @@
   "scripts": {
     "build": "tsdown",
     "dev": "tsdown --watch",
-    "start": "node dist/index.js",
     "test": "jest",
     "typecheck": "tsc --noEmit",
-    "example:topsis": "tsc && node dist/examples/topsis.js",
-    "example:promethee": "tsc && node dist/examples/promethee.js",
     "prettier": "prettier . --write"
   },
   "keywords": [
