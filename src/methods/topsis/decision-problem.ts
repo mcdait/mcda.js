@@ -1,3 +1,4 @@
+import { ctranspose, dotMultiply, norm } from "mathjs";
 import { CriterionType } from "../../types";
 import type { DecisionMatrix, Scores } from "../../types";
 import { AbstractNormalizedDecisionProblem } from "../../core";
@@ -36,20 +37,15 @@ export class TopsisDecisionProblem extends AbstractNormalizedDecisionProblem {
   }
 
   private applyWeights(matrix: DecisionMatrix): DecisionMatrix {
-    return matrix.map((alternativeValues) =>
-      alternativeValues.map((value, criterionIndex) => {
-        const weight = this.weights[criterionIndex] ?? 0;
-
-        return value * weight;
-      }),
+    return matrix.map(
+      (alternativeValues) => dotMultiply(alternativeValues, this.weights) as number[],
     );
   }
 
   private getIdealValues(matrix: DecisionMatrix, bestValues: boolean): number[] {
-    return this.weights.map((_, criterionIndex) => {
-      const criterionValues = matrix.map(
-        (alternativeValues) => alternativeValues[criterionIndex] ?? 0,
-      );
+    const criteriaValues = ctranspose(matrix) as number[][];
+
+    return criteriaValues.map((criterionValues, criterionIndex) => {
       const criterionType = this.types[criterionIndex];
       const benefitValue = bestValues ? Math.max : Math.min;
       const costValue = bestValues ? Math.min : Math.max;
@@ -61,13 +57,13 @@ export class TopsisDecisionProblem extends AbstractNormalizedDecisionProblem {
 
   private getDistances(matrix: DecisionMatrix, idealValues: number[]): number[] {
     return matrix.map((alternativeValues) => {
-      const sumOfSquares = alternativeValues.reduce((sum, value, criterionIndex) => {
+      const distanceValues = alternativeValues.map((value, criterionIndex) => {
         const idealValue = idealValues[criterionIndex] ?? 0;
 
-        return sum + (value - idealValue) ** 2;
-      }, 0);
+        return value - idealValue;
+      });
 
-      return Math.sqrt(sumOfSquares);
+      return Number(norm(distanceValues));
     });
   }
 }

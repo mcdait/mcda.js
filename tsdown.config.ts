@@ -24,4 +24,9 @@ export default defineConfig({
     level: "warn",
   },
   globalName: "Mcda",
+  outputOptions: {
+    globals: {
+      mathjs: "math",
+    },
+  },
 });

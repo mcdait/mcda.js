@@ -57,5 +57,8 @@
   "homepage": "https://github.com/mcdait/mcda.js",
   "bugs": {
     "url": "https://github.com/mcdait/mcda.js/issues"
+  },
+  "dependencies": {
+    "mathjs": "^15.2.0"
   }
 }

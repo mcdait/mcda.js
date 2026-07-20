@@ -1,16 +1,9 @@
+import { ctranspose, norm } from "mathjs";
 import type { DecisionMatrix } from "../types";
 
 export function vectorNormalizationCallback(matrix: DecisionMatrix): DecisionMatrix {
-  const criteriaCount = matrix[0]?.length ?? 0;
-  const divisors = Array.from({ length: criteriaCount }, (_, criterionIndex) => {
-    const sumOfSquares = matrix.reduce((sum, alternativeValues) => {
-      const value = alternativeValues[criterionIndex] ?? 0;
-
-      return sum + value ** 2;
-    }, 0);
-
-    return Math.sqrt(sumOfSquares);
-  });
+  const criteriaValues = ctranspose(matrix) as number[][];
+  const divisors = criteriaValues.map((values) => Number(norm(values)));
 
   return matrix.map((alternativeValues) =>
     alternativeValues.map((value, criterionIndex) => {

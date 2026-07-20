@@ -1,3 +1,4 @@
+import { ctranspose, dot, sum } from "mathjs";
 import { CriterionType } from "../../types";
 import type { DecisionMatrix, Scores } from "../../types";
 import { AbstractDecisionProblem } from "../../core";
@@ -60,7 +61,7 @@ export class PrometheeDecisionProblem
   }
 
   private getPreferenceDegree(leftAlternative: number[], rightAlternative: number[]): number {
-    return this.weights.reduce((sum, weight, criterionIndex) => {
+    const preferences = this.weights.map((_, criterionIndex) => {
       const leftValue = leftAlternative[criterionIndex] ?? 0;
       const rightValue = rightAlternative[criterionIndex] ?? 0;
       const criterionType = this.types[criterionIndex];
@@ -69,8 +70,10 @@ export class PrometheeDecisionProblem
       const preferenceFunction = this.preferenceFunctions[criterionIndex];
       const preference = this.getCriterionPreference(difference, preferenceFunction);
 
-      return sum + weight * preference;
-    }, 0);
+      return preference;
+    });
+
+    return dot(this.weights, preferences);
   }
 
   private getCriterionPreference(
@@ -95,13 +98,9 @@ export class PrometheeDecisionProblem
   }
 
   private getNegativeFlows(preferenceMatrix: DecisionMatrix): number[] {
-    return preferenceMatrix.map((_, alternativeIndex) => {
-      const incomingPreferences = preferenceMatrix.map(
-        (preferenceValues) => preferenceValues[alternativeIndex] ?? 0,
-      );
+    const incomingPreferences = ctranspose(preferenceMatrix) as number[][];
 
-      return this.getAverage(incomingPreferences);
-    });
+    return incomingPreferences.map((preferenceValues) => this.getAverage(preferenceValues));
   }
 
   private getAverage(values: number[]): number {
@@ -109,9 +108,7 @@ export class PrometheeDecisionProblem
       return 0;
     }
 
-    const sum = values.reduce((total, value) => total + value, 0);
-
-    return sum / (values.length - 1);
+    return Number(sum(values)) / (values.length - 1);
   }
 
   private validatePreferenceFunctions(): void {
