@@ -3,6 +3,11 @@ export enum CriterionType {
   COST = -1, // lower values are better
 }
 
+/**
+ * A two-dimensional matrix of decision values.
+ * The first index corresponds to the alternative (row),
+ * and the second index corresponds to the criterion (column).
+ */
 export type DecisionMatrix = number[][];
 export type DecisionMatrixObject = Record<string, Record<string, number>>;
 export type Scores = number[];
@@ -37,7 +42,10 @@ export interface CriteriaInputInterface {
   set criteria(criteria: string[]);
 }
 
-export type NormalizationCallback = (matrix: DecisionMatrix) => DecisionMatrix;
+export type NormalizationCallback = (
+  matrix: DecisionMatrix,
+  types: CriterionType[],
+) => DecisionMatrix;
 
 export interface ConfigurableNormalizationInterface {
   get normalizationCallback(): NormalizationCallback | undefined;
