@@ -5,6 +5,7 @@ export * from "./core";
 export * from "./methods/promethee";
 export * from "./methods/topsis";
 export * from "./methods/vikor";
+export * from "./methods/spotis";
 
 // Common types
 export * from "./types";
