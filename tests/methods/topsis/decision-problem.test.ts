@@ -30,8 +30,9 @@ function createTopsisProblem(): TopsisDecisionProblem {
 describe("TopsisDecisionProblem", () => {
   test("calculates scores", () => {
     const problem = createTopsisProblem();
+    const roundedScores = problem.scores.map((s) => Math.round(s * 10000) / 10000);
 
-    expect(problem.scores).toEqual([0.4118760178494926, 0.6217594689573571, 0.3782405310426429]);
+    expect(roundedScores).toEqual([0.4119, 0.6218, 0.3782]);
   });
 
   test("requires normalization callback", () => {

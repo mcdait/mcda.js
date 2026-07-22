@@ -13,7 +13,7 @@ export class TopsisDecisionProblem extends AbstractNormalizedDecisionProblem {
       throw new Error("TOPSIS requires a normalization callback.");
     }
 
-    const normalizedMatrix = this.normalizationCallback(this.matrix);
+    const normalizedMatrix = this.normalizationCallback(this.matrix, this.types);
     this.addToDebugBag("normalizedMatrix", normalizedMatrix);
     const weightedNormalizedMatrix = this.applyWeights(normalizedMatrix);
     this.addToDebugBag("weightedNormalizedMatrix", weightedNormalizedMatrix);
@@ -50,12 +50,16 @@ export class TopsisDecisionProblem extends AbstractNormalizedDecisionProblem {
       const criterionValues = matrix.map(
         (alternativeValues) => alternativeValues[criterionIndex] ?? 0,
       );
-      const criterionType = this.types[criterionIndex];
-      const benefitValue = bestValues ? Math.max : Math.min;
-      const costValue = bestValues ? Math.min : Math.max;
-      const picker = criterionType === CriterionType.BENEFIT ? benefitValue : costValue;
 
-      return picker(...criterionValues);
+      if (bestValues) {
+        const positiveIdealValues = Math.max(...criterionValues);
+
+        return positiveIdealValues;
+      } else {
+        const negativeIdealValues = Math.min(...criterionValues);
+
+        return negativeIdealValues;
+      }
     });
   }
 
