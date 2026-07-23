@@ -84,3 +84,171 @@ export function linearNormalizationCallback(
     }),
   );
 }
+
+export function maxNormalizationCallback(
+  matrix: DecisionMatrix,
+  types: CriterionType[],
+): DecisionMatrix {
+  if (!matrix.length) {
+    return matrix;
+  }
+
+  const criteriaCount = matrix[0].length;
+
+  const maxima = Array.from({ length: criteriaCount }, (_, criterionIndex) => {
+    const criterionValues = matrix.map((alternativeValues) => alternativeValues[criterionIndex]);
+
+    return Math.max(...criterionValues);
+  });
+
+  const normalizedMatrix: DecisionMatrix = [];
+
+  for (const alternativeValues of matrix) {
+    const normalizedAlternativeValues: number[] = [];
+
+    for (let criterionIndex = 0; criterionIndex < criteriaCount; criterionIndex++) {
+      const maximum = maxima[criterionIndex] ?? 0;
+
+      if (maximum === 0) {
+        throw new Error(
+          `Cannot normalize criterion at index ${criterionIndex} because the maximum value is zero.`,
+        );
+      }
+
+      const value = alternativeValues[criterionIndex];
+      const normalizedValue = value / maximum;
+
+      if (types[criterionIndex] === CriterionType.COST) {
+        normalizedAlternativeValues.push(1 - normalizedValue);
+      } else {
+        normalizedAlternativeValues.push(normalizedValue);
+      }
+    }
+
+    normalizedMatrix.push(normalizedAlternativeValues);
+  }
+
+  return normalizedMatrix;
+}
+
+export function minMaxNormalizationCallback(
+  matrix: DecisionMatrix,
+  types: CriterionType[],
+): DecisionMatrix {
+  if (!matrix.length) {
+    return matrix;
+  }
+
+  const criteriaCount = matrix[0].length;
+  const ranges = Array.from({ length: criteriaCount }, (_, criterionIndex) => {
+    const criterionValues = matrix.map(
+      (alternativeValues) => alternativeValues[criterionIndex] ?? 0,
+    );
+
+    return {
+      min: Math.min(...criterionValues),
+      max: Math.max(...criterionValues),
+    };
+  });
+
+  const normalizedMatrix: DecisionMatrix = [];
+
+  for (const alternativeValues of matrix) {
+    const normalizedAlternativeValues: number[] = [];
+
+    for (let criterionIndex = 0; criterionIndex < criteriaCount; criterionIndex++) {
+      const range = ranges[criterionIndex];
+
+      if (range === undefined) {
+        throw new Error("Min-max normalization criterion range is required.");
+      }
+
+      const denominator = range.max - range.min;
+
+      if (denominator === 0) {
+        throw new Error(
+          `Cannot normalize criterion at index ${criterionIndex} because all values are equal.`,
+        );
+      }
+
+      const value = alternativeValues[criterionIndex];
+
+      if (types[criterionIndex] === CriterionType.COST) {
+        normalizedAlternativeValues.push((range.max - value) / denominator);
+      } else {
+        normalizedAlternativeValues.push((value - range.min) / denominator);
+      }
+    }
+
+    normalizedMatrix.push(normalizedAlternativeValues);
+  }
+
+  return normalizedMatrix;
+}
+
+export function sumNormalizationCallback(
+  matrix: DecisionMatrix,
+  types: CriterionType[],
+): DecisionMatrix {
+  if (!matrix.length) {
+    return matrix;
+  }
+
+  for (const alternativeValues of matrix) {
+    for (const alternativeValue of alternativeValues) {
+      if (alternativeValue < 0) {
+        throw new Error("Sum normalization requires that none of the values are negative");
+      }
+    }
+  }
+
+  const criteriaCount = matrix[0].length;
+
+  const divisors = Array.from({ length: criteriaCount }, (_, criterionIndex) => {
+    if (types[criterionIndex] === CriterionType.COST) {
+      return matrix.reduce((sum, alternativeValues) => {
+        const value = alternativeValues[criterionIndex];
+
+        if (value === 0) {
+          throw new Error(
+            `Cannot normalize criterion at index ${criterionIndex} because it contains zero values`,
+          );
+        }
+
+        return sum + 1 / value;
+      }, 0);
+    }
+
+    return matrix.reduce((sum, alternativeValues) => {
+      return sum + alternativeValues[criterionIndex];
+    }, 0);
+  });
+
+  const normalizedMatrix: DecisionMatrix = [];
+
+  for (const alternativeValues of matrix) {
+    const normalizedAlternativeValues: number[] = [];
+
+    for (let criterionIndex = 0; criterionIndex < criteriaCount; criterionIndex++) {
+      const divisor = divisors[criterionIndex] ?? 0;
+
+      if (divisor === 0) {
+        throw new Error(
+          `Cannot normalize criterion at index ${criterionIndex} because the divisor is zero`,
+        );
+      }
+
+      const value = alternativeValues[criterionIndex];
+
+      if (types[criterionIndex] === CriterionType.COST) {
+        normalizedAlternativeValues.push(1 / value / divisor);
+      } else {
+        normalizedAlternativeValues.push(value / divisor);
+      }
+    }
+
+    normalizedMatrix.push(normalizedAlternativeValues);
+  }
+
+  return normalizedMatrix;
+}
