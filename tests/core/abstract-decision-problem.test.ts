@@ -107,6 +107,98 @@ describe("AbstractDecisionProblem", () => {
     }).toThrow("Decision problem matrix object alternatives must contain the same criteria.");
   });
 
+  test("throws when weights are empty", () => {
+    const problem = new TestDecisionProblem();
+
+    problem.matrix = matrix;
+    problem.weights = [];
+    problem.types = [];
+
+    expect(() => problem.scores).toThrow("Decision problem requires at least one criterion.");
+  });
+
+  test("throws when criterion types do not match weights length", () => {
+    const problem = new TestDecisionProblem();
+
+    problem.matrix = matrix;
+    problem.weights = [0.4, 0.35, 0.25];
+    problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT];
+
+    expect(() => problem.scores).toThrow(
+      "Decision problem requires one criterion type per weight.",
+    );
+  });
+
+  test("throws when matrix is empty", () => {
+    const problem = new TestDecisionProblem();
+
+    problem.matrix = [];
+    problem.weights = [0.4, 0.35, 0.25];
+    problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
+
+    expect(() => problem.scores).toThrow("Decision problem requires at least one alternative.");
+  });
+
+  test("throws when matrix rows do not match weights length", () => {
+    const problem = new TestDecisionProblem();
+
+    problem.matrix = [[8, 7]];
+    problem.weights = [0.4, 0.35, 0.25];
+    problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
+
+    expect(() => problem.scores).toThrow(
+      "Decision problem matrix rows must match the weights length.",
+    );
+  });
+
+  test("throws when alternative names count does not match matrix rows", () => {
+    const problem = new TestDecisionProblem();
+
+    problem.alternatives = ["a1", "a2"];
+    problem.matrix = matrix;
+    problem.weights = [0.4, 0.35, 0.25];
+    problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
+
+    expect(() => problem.scores).toThrow(
+      "Decision problem requires one alternative name per alternative when alternative names are provided.",
+    );
+  });
+
+  test("throws when criterion names count does not match weights length", () => {
+    const problem = new TestDecisionProblem();
+
+    problem.criteria = ["c1", "c2"];
+    problem.matrix = matrix;
+    problem.weights = [0.4, 0.35, 0.25];
+    problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
+
+    expect(() => problem.scores).toThrow(
+      "Decision problem requires one criterion name per criterion when criterion names are provided.",
+    );
+  });
+
+  test("throws when alternative names are empty", () => {
+    const problem = new TestDecisionProblem();
+
+    problem.alternatives = ["a1", " ", "a3"];
+    problem.matrix = matrix;
+    problem.weights = [0.4, 0.35, 0.25];
+    problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
+
+    expect(() => problem.scores).toThrow("Decision problem alternative names cannot be empty.");
+  });
+
+  test("throws when criterion names are empty", () => {
+    const problem = new TestDecisionProblem();
+
+    problem.criteria = ["c1", "", "c3"];
+    problem.matrix = matrix;
+    problem.weights = [0.4, 0.35, 0.25];
+    problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
+
+    expect(() => problem.scores).toThrow("Decision problem criterion names cannot be empty.");
+  });
+
   test("adds values to debug bag only when debug is enabled", () => {
     const problem = new TestDecisionProblem();
 

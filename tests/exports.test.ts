@@ -9,4 +9,8 @@ describe("MCDA Exports", () => {
   test("should export PrometheeDecisionProblem", () => {
     expect(mcda.PrometheeDecisionProblem).toBeDefined();
   });
+
+  test("should export MabacDecisionProblem", () => {
+    expect(mcda.MabacDecisionProblem).toBeDefined();
+  });
 });
