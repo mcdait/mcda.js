@@ -45,3 +45,42 @@ export function vectorNormalizationCallback(
 
   return normalizedMatrix;
 }
+
+export function linearNormalizationCallback(
+  matrix: DecisionMatrix,
+  types: CriterionType[],
+): DecisionMatrix {
+  const criteriaCount = matrix[0]?.length ?? 0;
+  const ranges = Array.from({ length: criteriaCount }, (_, criterionIndex) => {
+    const criterionValues = matrix.map(
+      (alternativeValues) => alternativeValues[criterionIndex] ?? 0,
+    );
+
+    return {
+      min: Math.min(...criterionValues),
+      max: Math.max(...criterionValues),
+    };
+  });
+
+  return matrix.map((alternativeValues) =>
+    alternativeValues.map((value, criterionIndex) => {
+      const range = ranges[criterionIndex];
+
+      if (range === undefined) {
+        throw new Error("Linear normalization criterion range is required.");
+      }
+
+      const denominator = range.max - range.min;
+
+      if (denominator === 0) {
+        return 0;
+      }
+
+      if (types[criterionIndex] === CriterionType.COST) {
+        return (range.max - value) / denominator;
+      }
+
+      return (value - range.min) / denominator;
+    }),
+  );
+}
