@@ -21,4 +21,8 @@ describe("MCDA Exports", () => {
   test("should export MabacDecisionProblem", () => {
     expect(mcda.MabacDecisionProblem).toBeDefined();
   });
+
+  test("should export EdasDecisionProblem", () => {
+    expect(mcda.EdasDecisionProblem).toBeDefined();
+  });
 });
