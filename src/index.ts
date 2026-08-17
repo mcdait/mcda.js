@@ -5,6 +5,7 @@ export * from "./core";
 export * from "./methods/promethee";
 export * from "./methods/mabac";
 export * from "./methods/edas";
+export * from "./methods/waspas";
 export * from "./methods/codas";
 export * from "./methods/topsis";
 export * from "./methods/vikor";
