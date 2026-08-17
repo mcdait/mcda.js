@@ -9,6 +9,7 @@ export * from "./methods/codas";
 export * from "./methods/topsis";
 export * from "./methods/vikor";
 export * from "./methods/spotis";
+export * from "./methods/saw";
 
 // Common types
 export * from "./types";

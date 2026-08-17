@@ -26,6 +26,10 @@ describe("MCDA Exports", () => {
     expect(mcda.EdasDecisionProblem).toBeDefined();
   });
 
+  test("should export SawDecisionProblem", () => {
+    expect(mcda.SawDecisionProblem).toBeDefined();
+  });
+
   test("should export CodasDecisionProblem", () => {
     expect(mcda.CodasDecisionProblem).toBeDefined();
   });
