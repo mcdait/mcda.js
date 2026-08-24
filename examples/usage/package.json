@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "mcdajs": "^0.0.4"
+  },
+  "devDependencies": {
+    "tsx": "^4.23.1"
+  },
+  "scripts": {
+    "saw-matrix": "tsx saw-matrix.ts",
+    "saw-object": "tsx saw-object.ts",
+    "topsis-object": "tsx topsis-object.ts"
+  }
+}
