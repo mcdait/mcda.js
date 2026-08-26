@@ -4,6 +4,7 @@ Object-oriented Multiple Criteria Decision Analysis library for JavaScript and T
 
 [![github](https://img.shields.io/badge/github-repo-000.svg?logo=github&labelColor=gray&color=blue)](https://github.com/mcdait/mcda.js)
 [![NPM Version](https://img.shields.io/npm/v/mcdajs)](https://www.npmjs.com/package/mcdajs)
+[![Static Badge](https://img.shields.io/badge/doi-10.1016/j.omega.2018.07.004-blue)](https://doi.org/10.1016/j.omega.2018.07.004)
 
 ## Citing MCDA.js
 
@@ -198,10 +199,15 @@ See the **examples** directory for complete examples demonstrating usage in brow
 
 Currently, the library supports the following MCDA methods:
 
-- American School
-  - TOPSIS (Technique for the Order of Prioritisation by Similarity to Ideal Solution) [[1]](#ref-topsis)
-- European School
-  - PROMETHEE II (Preference Ranking Organization METHod for Enrichment of Evaluations II) [[2]](#ref-promethee)
+- TOPSIS (Technique for the Order of Prioritisation by Similarity to Ideal Solution) [[1]](#ref-topsis)
+- PROMETHEE II (Preference Ranking Organization METHod for Enrichment of Evaluations II) [[2]](#ref-promethee)
+- CODAS (COmbinative Distance-based ASsessment) [[3]](#ref-codas)
+- EDAS (Evaluation based on Distance from Average Solution) [[4]](#ref-edas)
+- MABAC (Multi-Attributive Border Approximation area Comparison) [[5]](#ref-mabac)
+- SAW (Simple Additive Weighting) [[6]](#ref-saw)
+- SPOTIS (Stable Preference Ordering Towards Ideal Solution) [[7]](#ref-spotis)
+- VIKOR (VIšeKriterijumska Optimizacija I Kompromisno Rešenje) [[8]](#ref-vikor)
+- WASPAS (Weighted Aggregates Sum Product ASsessment) [[9]](#ref-waspas)
 
 
 ## References
@@ -209,3 +215,17 @@ Currently, the library supports the following MCDA methods:
 <a name="ref-topsis">[1]</a> Hwang, C. L., & Yoon, K. (1981). Methods for multiple attribute decision making. In Multiple attribute decision making (pp. 58-191). Springer, Berlin, Heidelberg.
 
 <a name="ref-promethee">[2]</a> Brans, J. P., Vincke, P., & Mareschal, B. (1986). How to select and how to rank projects: The PROMETHEE method. European journal of operational research, 24(2), 228-238.
+
+<a name="ref-codas">[3]</a> Keshavarz-Ghorabaee, M. (2016). A new combinative distance-based assessment (CODAS) method for multi-criteria decision-making.
+
+<a name="ref-edas">[4]</a> Keshavarz Ghorabaee, M., Zavadskas, E. K., Olfat, L., & Turskis, Z. (2015). Multi-criteria inventory classification using a new method of evaluation based on distance from average solution (EDAS). Informatica, 26(3), 435-451.
+
+<a name="ref-mabac">[5]</a>  Pamučar, D., & Ćirović, G. (2015). The selection of transport and handling resources in logistics centers using Multi-Attributive Border Approximation area Comparison (MABAC). Expert systems with applications, 42(6), 3016-3028.
+
+<a name="ref-saw">[6]</a> Fishburn, P. C. (1967). Additive utilities with incomplete product sets: Application to priorities and assignments. Operations research, 15(3), 537-542.
+
+<a name="ref-spotis">[7]</a> Dezert, J., Tchamova, A., Han, D., & Tacnet, J. M. (2020, July). The SPOTIS rank reversal free method for multi-criteria decision-making support. In 2020 IEEE 23rd international conference on information fusion (FUSION) (pp. 1-8). IEEE.
+
+<a name="ref-vikor">[8]</a> Opricovic, S. (1998). Multicriteria optimization of civil engineering systems. Faculty of civil engineering, Belgrade, 2(1), 5-21.
+
+<a name="ref-waspas">[9]</a> Zavadskas, E. K., Turskis, Z., Antucheviciene, J., & Zakarevicius, A. (2012). Optimization of weighted aggregated sum product assessment. Elektronika ir elektrotechnika, 122(6), 3-6.

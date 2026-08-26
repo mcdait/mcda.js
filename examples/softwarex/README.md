@@ -13,6 +13,7 @@ npm ci
 Run preview locally:
 
 ```sh
+npm run build
 npm run preview
 ```
 

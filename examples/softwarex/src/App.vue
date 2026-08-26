@@ -289,9 +289,9 @@ export default defineComponent({
             </h2>
             <div id="decisionMatrix" class="accordion-collapse collapse show">
               <div class="accordion-body">
-                <div class="table-responsive">
+                <div class="table-responsive" style="max-height: 50vh; overflow-y: auto">
                   <table class="table table-striped table-bordered table-hover">
-                    <thead>
+                    <thead class="sticky-top">
                       <tr>
                         <th scope="col">ISO</th>
                         <th scope="col">HLT</th>
@@ -332,15 +332,21 @@ export default defineComponent({
                     <thead>
                       <tr>
                         <th scope="col">Criterion</th>
-                        <th scope="col" class="d-flex justify-content-between">
-                          <span>Weight</span>
-
-                          <button class="btn btn-sm btn-outline-primary" @click="applyWeights">
-                            Apply
-                          </button>
-                          <button class="btn btn-sm btn-outline-secondary" @click="resetWeights">
-                            Reset
-                          </button>
+                        <th scope="col">
+                          <div class="d-flex justify-content-between align-items-end">
+                            <span>Weight</span>
+                            <div class="d-flex gap-2">
+                              <button
+                                class="btn btn-sm btn-outline-secondary"
+                                @click="resetWeights"
+                              >
+                                Reset
+                              </button>
+                              <button class="btn btn-sm btn-outline-primary" @click="applyWeights">
+                                Apply
+                              </button>
+                            </div>
+                          </div>
                         </th>
                       </tr>
                     </thead>
@@ -384,14 +390,18 @@ export default defineComponent({
                     <tr>
                       <th>Method</th>
                       <th>Parameter</th>
-                      <th class="d-flex justify-content-between">
-                        <span>Value</span>
-                        <button class="btn btn-sm btn-outline-primary" @click="applySettings">
-                          Apply
-                        </button>
-                        <button class="btn btn-sm btn-outline-secondary" @click="resetSettings">
-                          Reset
-                        </button>
+                      <th>
+                        <div class="d-flex justify-content-between align-items-end">
+                          <span>Value</span>
+                          <div class="d-flex gap-2">
+                            <button class="btn btn-sm btn-outline-secondary" @click="resetSettings">
+                              Reset
+                            </button>
+                            <button class="btn btn-sm btn-outline-primary" @click="applySettings">
+                              Apply
+                            </button>
+                          </div>
+                        </div>
                       </th>
                     </tr>
                   </thead>
@@ -476,9 +486,9 @@ export default defineComponent({
             </h2>
             <div id="rankings" class="accordion-collapse collapse show">
               <div class="accordion-body">
-                <div class="table-responsive">
+                <div class="table-responsive" style="max-height: 50vh; overflow-y: auto">
                   <table class="table table-bordered table-striped">
-                    <thead>
+                    <thead class="sticky-top">
                       <tr>
                         <th>ISO</th>
                         <th v-for="(method, index) in Object.keys(rankings)" :key="method">
@@ -515,12 +525,6 @@ export default defineComponent({
               </div>
             </div>
           </div>
-        </div>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-12">
-        <div class="accordion mb-3" id="bottomAccordion">
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button
@@ -544,12 +548,12 @@ export default defineComponent({
                     @click="togglePlotFullscreen"
                   ></div>
                 </div>
+                <div class="d-flex justify-content-end gap-2 p-2">
+                  <button class="btn btn-sm btn-outline-secondary" @click="downloadPlotSvg">
+                    Download SVG
+                  </button>
+                </div>
               </div>
-            </div>
-            <div class="d-flex justify-content-end gap-2 p-2">
-              <button class="btn btn-sm btn-outline-secondary" @click="downloadPlotSvg">
-                Download SVG
-              </button>
             </div>
           </div>
         </div>
