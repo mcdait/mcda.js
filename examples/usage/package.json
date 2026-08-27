@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "mcdajs": "^0.0.4"
+    "mcdajs": "^1.0.0"
   },
   "devDependencies": {
     "tsx": "^4.23.1"
