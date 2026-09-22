@@ -252,3 +252,44 @@ export function sumNormalizationCallback(
 
   return normalizedMatrix;
 }
+
+/** pyrepo_mcda linear normalization: benefit x/max, cost min/x. */
+export function ratioNormalizationCallback(
+  matrix: DecisionMatrix,
+  types: CriterionType[],
+): DecisionMatrix {
+  if (!matrix.length || !matrix[0].length)
+    throw new Error("Normalization requires a non-empty matrix.");
+  const count = matrix[0].length;
+  if (
+    types.length !== count ||
+    types.some((t) => t !== 1 && t !== -1) ||
+    matrix.some((row) => row.length !== count || row.some((x) => !Number.isFinite(x) || x <= 0))
+  ) {
+    throw new Error(
+      "Ratio normalization requires positive finite values and matching criterion types.",
+    );
+  }
+  const minima = matrix[0].map((_, j) => Math.min(...matrix.map((row) => row[j])));
+  const maxima = matrix[0].map((_, j) => Math.max(...matrix.map((row) => row[j])));
+  return matrix.map((row) =>
+    row.map((x, j) => (types[j] === CriterionType.COST ? minima[j] / x : x / maxima[j])),
+  );
+}
+
+/** Vector magnitudes without converting cost criteria into benefits. */
+export function vectorMagnitudeNormalizationCallback(
+  matrix: DecisionMatrix,
+  _types?: CriterionType[],
+): DecisionMatrix {
+  if (!matrix.length || !matrix[0].length)
+    throw new Error("Normalization requires a non-empty matrix.");
+  const count = matrix[0].length;
+  if (matrix.some((row) => row.length !== count || row.some((x) => !Number.isFinite(x)))) {
+    throw new Error("Vector magnitude normalization requires a rectangular finite matrix.");
+  }
+  const divisors = matrix[0].map((_, j) => Math.hypot(...matrix.map((row) => row[j])));
+  if (divisors.some((x) => x === 0 || !Number.isFinite(x)))
+    throw new Error("Vector magnitude divisor must be finite and positive.");
+  return matrix.map((row) => row.map((x, j) => x / divisors[j]));
+}

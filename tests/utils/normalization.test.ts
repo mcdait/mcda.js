@@ -4,7 +4,9 @@ import {
   linearNormalizationCallback,
   maxNormalizationCallback,
   minMaxNormalizationCallback,
+  ratioNormalizationCallback,
   sumNormalizationCallback,
+  vectorMagnitudeNormalizationCallback,
   vectorNormalizationCallback,
 } from "../../src/utils";
 
@@ -180,5 +182,40 @@ describe("sumNormalizationCallback", () => {
         [CriterionType.BENEFIT, CriterionType.BENEFIT],
       ),
     ).toThrow("Sum normalization requires that none of the values are negative");
+  });
+});
+
+const matrix = [
+  [8, 7, 1200],
+  [7, 9, 1000],
+  [9, 6, 1400],
+];
+const rounded = (matrix: number[][]) =>
+  matrix.map((row) => row.map((x) => Math.round(x * 10000) / 10000));
+describe("Additional normalizations", () => {
+  it("matches Python linear normalization including costs", () => {
+    expect(rounded(ratioNormalizationCallback(matrix, [1, 1, -1]))).toEqual([
+      [0.8889, 0.7778, 0.8333],
+      [0.7778, 1.0, 1.0],
+      [1.0, 0.6667, 0.7143],
+    ]);
+  });
+  it("matches Python MULTIMOORA normalization without cost inversion", () => {
+    expect(rounded(vectorMagnitudeNormalizationCallback(matrix))).toEqual([
+      [0.5744, 0.5433, 0.5721],
+      [0.5026, 0.6985, 0.4767],
+      [0.6462, 0.4657, 0.6674],
+    ]);
+  });
+  it("rejects zero divisors and malformed matrices", () => {
+    expect(() => ratioNormalizationCallback([[0, 1]], [1, -1])).toThrow();
+    expect(() =>
+      vectorMagnitudeNormalizationCallback([
+        [0, 1],
+        [0, 2],
+      ]),
+    ).toThrow();
+    expect(() => vectorMagnitudeNormalizationCallback([[1], [1, 2]])).toThrow();
+    expect(() => ratioNormalizationCallback([[1, Infinity]], [1, -1])).toThrow();
   });
 });

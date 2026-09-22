@@ -119,7 +119,7 @@ export abstract class AbstractDecisionProblem
   }
 
   public enableDebug(enableDebug: boolean): void {
-    this._debugBag = {};
+    this._debugBag = enableDebug ? {} : undefined;
   }
 
   public abstract get scores(): Scores;
