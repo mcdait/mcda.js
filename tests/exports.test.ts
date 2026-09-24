@@ -38,3 +38,35 @@ describe("MCDA Exports", () => {
     expect(mcda.WaspasDecisionProblem).toBeDefined();
   });
 });
+
+describe("Additional MCDA exports", () => {
+  test.each([
+    "ArasDecisionProblem",
+    "CoprasDecisionProblem",
+    "CradisDecisionProblem",
+    "CocosoDecisionProblem",
+    "MarcosDecisionProblem",
+    "AhpDecisionProblem",
+    "MultimooraDecisionProblem",
+    "MultimooraRsDecisionProblem",
+    "MultimooraRpDecisionProblem",
+    "MultimooraFmfDecisionProblem",
+    "ProsaCDecisionProblem",
+    "PvmDecisionProblem",
+    "PvmCriterionType",
+    "VmcmDecisionProblem",
+    "VikorSmaaAnalysis",
+    "ratioNormalizationCallback",
+    "vectorMagnitudeNormalizationCallback",
+    "determineVmcmPatterns",
+    "eigenvectorPriority",
+    "geometricMeanPriority",
+    "normalizedRowSumPriority",
+    "dominanceDirectedGraph",
+    "copeland",
+    "rankPosition",
+    "improvedBorda",
+  ] as const)("exports %s", (name) => {
+    expect(mcda[name]).toBeDefined();
+  });
+});

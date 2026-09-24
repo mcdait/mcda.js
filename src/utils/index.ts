@@ -1,4 +1,6 @@
 export {
+  ratioNormalizationCallback,
+  vectorMagnitudeNormalizationCallback,
   linearNormalizationCallback,
   minMaxNormalizationCallback,
   maxNormalizationCallback,
