@@ -1,12 +1,5 @@
-import type {
-  AlternativesInputInterface,
-  CriteriaInputInterface,
-  WeightsInputInterface,
-  DebuggableInterface,
-  DebugBag,
-  DecisionMatrix,
-  Scores,
-} from "../../types";
+import { AbstractBaseDecisionProblem } from "../../core";
+import type { DecisionMatrix, Scores } from "../../types";
 import { finiteVector, sum, validateMatrix, validateWeights } from "../shared/numeric";
 
 import type { AhpMatrix, AhpPriorityMethod, AhpConsistency } from "./types";
@@ -14,42 +7,14 @@ import type { AhpMatrix, AhpPriorityMethod, AhpConsistency } from "./types";
 import { eigenvectorPriority } from "./priority-functions";
 
 /** Classic AHP: one pairwise comparison matrix per criterion. */
-export class AhpDecisionProblem
-  implements
-    AlternativesInputInterface,
-    CriteriaInputInterface,
-    WeightsInputInterface,
-    DebuggableInterface
-{
-  protected _alternatives: string[] = [];
-  protected _criteria: string[] = [];
-  public get alternatives(): string[] {
-    return this._alternatives;
-  }
-  public set alternatives(value: string[]) {
-    this._alternatives = value;
-  }
-  public get criteria(): string[] {
-    return this._criteria;
-  }
-  public set criteria(value: string[]) {
-    this._criteria = value;
-  }
+export class AhpDecisionProblem extends AbstractBaseDecisionProblem {
   protected _matrix: AhpMatrix = [];
-  protected _weights: number[] = [];
   protected _priorityMethod: AhpPriorityMethod = eigenvectorPriority;
-  protected _debugBag: DebugBag | undefined;
   public get matrix(): AhpMatrix {
     return this._matrix;
   }
   public set matrix(value: AhpMatrix) {
     this._matrix = value;
-  }
-  public get weights(): number[] {
-    return this._weights;
-  }
-  public set weights(value: number[]) {
-    this._weights = value;
   }
   public get priorityMethod(): AhpPriorityMethod {
     return this._priorityMethod;
@@ -57,14 +22,7 @@ export class AhpDecisionProblem
   public set priorityMethod(value: AhpPriorityMethod) {
     this._priorityMethod = value;
   }
-  public get debugBag(): DebugBag | undefined {
-    return this._debugBag;
-  }
-  public enableDebug(enabled: boolean): void {
-    this._debugBag = enabled ? {} : undefined;
-  }
-
-  protected validate(): void {
+  protected override validate(): void {
     const matrices = this.matrix;
     if (!matrices.length) throw new Error("Classic AHP requires pairwise matrices.");
     validateWeights(this.weights, matrices.length);
@@ -75,8 +33,8 @@ export class AhpDecisionProblem
       validateMatrix(matrix, m, m);
       this.validatePairwise(matrix);
     });
-    this.validateNames(this.alternatives, m, "alternative");
-    this.validateNames(this.criteria, matrices.length, "criterion");
+    this.validateOptionalNames(this.alternatives, m, "alternative");
+    this.validateOptionalNames(this.criteria, matrices.length, "criterion");
   }
 
   private validatePairwise(matrix: DecisionMatrix): void {
@@ -109,20 +67,7 @@ export class AhpDecisionProblem
     };
   }
 
-  private validateNames(names: string[], count: number, kind: string): void {
-    if (!names.length) return;
-    if (names.length !== count || names.some((name) => !name.trim())) {
-      throw new Error(
-        `AHP requires one non-empty ${kind} name per ${kind} when names are provided.`,
-      );
-    }
-  }
-
-  public addToDebugBag(field: string, value: unknown): void {
-    if (this._debugBag !== undefined) this._debugBag[field] = value;
-  }
-
-  public get scores(): Scores {
+  public override get scores(): Scores {
     this.validate();
     const matrices = this.matrix;
     const m = matrices[0].length;

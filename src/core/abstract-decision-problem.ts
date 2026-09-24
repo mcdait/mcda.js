@@ -1,58 +1,19 @@
+import { AbstractBaseDecisionProblem } from "./abstract-base-decision-problem";
 import type {
-  AlternativesInputInterface,
-  CriteriaInputInterface,
   CriteriaTypesInputInterface,
-  DebugBag,
-  DebuggableInterface,
   DecisionMatrix,
   DecisionMatrixObject,
   MatrixInputInterface,
   MatrixObjectInputInterface,
-  Scores,
-  WeightsInputInterface,
   CriterionType,
 } from "../types";
 
 export abstract class AbstractDecisionProblem
-  implements
-    AlternativesInputInterface,
-    CriteriaInputInterface,
-    WeightsInputInterface,
-    CriteriaTypesInputInterface,
-    MatrixInputInterface,
-    MatrixObjectInputInterface,
-    DebuggableInterface
+  extends AbstractBaseDecisionProblem
+  implements CriteriaTypesInputInterface, MatrixInputInterface, MatrixObjectInputInterface
 {
-  protected _weights: number[] = [];
   protected _types: CriterionType[] = [];
   protected _matrix: DecisionMatrix = [];
-  protected _alternatives: string[] = [];
-  protected _criteria: string[] = [];
-  protected _debugBag: DebugBag | undefined = undefined;
-
-  public get alternatives(): string[] {
-    return this._alternatives;
-  }
-
-  public set alternatives(alternatives: string[]) {
-    this._alternatives = alternatives;
-  }
-
-  public get criteria(): string[] {
-    return this._criteria;
-  }
-
-  public set criteria(criteria: string[]) {
-    this._criteria = criteria;
-  }
-
-  public get weights(): number[] {
-    return this._weights;
-  }
-
-  public set weights(weights: number[]) {
-    this._weights = weights;
-  }
 
   public get types(): CriterionType[] {
     return this._types;
@@ -114,17 +75,7 @@ export abstract class AbstractDecisionProblem
     });
   }
 
-  public get debugBag(): DebugBag | undefined {
-    return this._debugBag;
-  }
-
-  public enableDebug(enableDebug: boolean): void {
-    this._debugBag = enableDebug ? {} : undefined;
-  }
-
-  public abstract get scores(): Scores;
-
-  protected validate(): void {
+  protected override validate(): void {
     const criteriaCount = this.weights.length;
 
     if (criteriaCount === 0) {
@@ -147,31 +98,5 @@ export abstract class AbstractDecisionProblem
 
     this.validateOptionalNames(this.alternatives, this.matrix.length, "alternative");
     this.validateOptionalNames(this.criteria, criteriaCount, "criterion");
-  }
-
-  private validateOptionalNames(names: string[], expectedCount: number, fieldName: string): void {
-    if (names.length === 0) {
-      return;
-    }
-
-    if (names.length !== expectedCount) {
-      throw new Error(
-        `Decision problem requires one ${fieldName} name per ${fieldName} when ${fieldName} names are provided.`,
-      );
-    }
-
-    for (const name of names) {
-      if (name.trim().length === 0) {
-        throw new Error(`Decision problem ${fieldName} names cannot be empty.`);
-      }
-    }
-  }
-
-  public addToDebugBag(field: string, value: unknown): void {
-    const debugBag = this.debugBag;
-
-    if (debugBag !== undefined) {
-      debugBag[field] = value;
-    }
   }
 }
