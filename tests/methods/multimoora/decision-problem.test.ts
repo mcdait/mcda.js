@@ -7,7 +7,6 @@ import {
   rankPosition,
 } from "../../../src";
 
-// Expected values from konkurencja/python/pyrepo_mcda_check-multimoora.py (pyrepo_mcda 0.1.8).
 const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): MultimooraDecisionProblem {
   const problem = new MultimooraDecisionProblem();
@@ -32,10 +31,10 @@ function createProblem(second = false): MultimooraDecisionProblem {
 }
 
 describe("MultimooraDecisionProblem", () => {
-  it("matches the Python example to four decimal places", () => {
+  it("calculates scores for three alternatives", () => {
     expect(rounded(createProblem().scores)).toEqual([2, 1, 3]);
   });
-  it("matches the four-criterion Python example", () => {
+  it("calculates scores with four criteria and unequal weights", () => {
     expect(rounded(createProblem(true).scores)).toEqual([1, 2, 1, 2]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
@@ -73,22 +72,22 @@ describe("MultimooraDecisionProblem", () => {
     problem.weights = [-1, 1, 1];
     expect(() => problem.scores).toThrow();
   });
-  it("matches Python copeland", () => {
+  it("combines component rankings using the Copeland method", () => {
     const problem = createProblem(true);
     problem.compromiseRankingCallback = copeland;
     expect(problem.ranks).toEqual([1, 2, 1, 2]);
   });
-  it("matches Python rank_position_method", () => {
+  it("combines component rankings using the rank position method", () => {
     const problem = createProblem(true);
     problem.compromiseRankingCallback = rankPosition;
     expect(problem.ranks).toEqual([1, 4, 2, 3]);
   });
-  it("matches Python improved_borda_rule_adapter", () => {
+  it("combines component rankings using the improved Borda rule", () => {
     const problem = createProblem(true);
     problem.compromiseRankingCallback = improvedBorda;
     expect(problem.ranks).toEqual([1, 4, 2, 3]);
   });
-  it("handles two alternatives without Python's graph allocation bug", () => {
+  it("ranks two alternatives using all three components", () => {
     const problem = createProblem();
     problem.matrix = [
       [1, 1, 10],
@@ -103,10 +102,10 @@ describe("MultimooraDecisionProblem", () => {
   });
 });
 
-it("multimoora default ranking matches the unrounded Python preferences", () => {
+it("ranks three alternatives using unrounded scores", () => {
   expect(createProblem(false).scores).toEqual([2, 1, 3]);
 });
 
-it("multimoora second ranking matches the unrounded Python preferences", () => {
+it("ranks alternatives with four criteria using unrounded scores", () => {
   expect(createProblem(true).scores).toEqual([1, 2, 1, 2]);
 });

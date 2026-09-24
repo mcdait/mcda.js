@@ -193,14 +193,14 @@ const matrix = [
 const rounded = (matrix: number[][]) =>
   matrix.map((row) => row.map((x) => Math.round(x * 10000) / 10000));
 describe("Additional normalizations", () => {
-  it("matches Python linear normalization including costs", () => {
+  it("normalizes benefit and cost criteria using ratios", () => {
     expect(rounded(ratioNormalizationCallback(matrix, [1, 1, -1]))).toEqual([
       [0.8889, 0.7778, 0.8333],
       [0.7778, 1.0, 1.0],
       [1.0, 0.6667, 0.7143],
     ]);
   });
-  it("matches Python MULTIMOORA normalization without cost inversion", () => {
+  it("normalizes vector magnitudes without reversing cost criteria", () => {
     expect(rounded(vectorMagnitudeNormalizationCallback(matrix))).toEqual([
       [0.5744, 0.5433, 0.5721],
       [0.5026, 0.6985, 0.4767],

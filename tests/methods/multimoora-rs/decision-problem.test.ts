@@ -2,7 +2,6 @@ import { describe, expect, it } from "@jest/globals";
 import { CriterionType, MultimooraRsDecisionProblem } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-// Expected values from konkurencja/python/pyrepo_mcda_check-multimoora-rs.py (pyrepo_mcda 0.1.8).
 const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): MultimooraRsDecisionProblem {
   const problem = new MultimooraRsDecisionProblem();
@@ -27,10 +26,10 @@ function createProblem(second = false): MultimooraRsDecisionProblem {
 }
 
 describe("MultimooraRsDecisionProblem", () => {
-  it("matches the Python example to four decimal places", () => {
+  it("calculates scores for three alternatives", () => {
     expect(rounded(createProblem().scores)).toEqual([0.2769, 0.3263, 0.2546]);
   });
-  it("matches the four-criterion Python example", () => {
+  it("calculates scores with four criteria and unequal weights", () => {
     expect(rounded(createProblem(true).scores)).toEqual([0.098, 0.0134, 0.0831, 0.004]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
@@ -70,10 +69,10 @@ describe("MultimooraRsDecisionProblem", () => {
   });
 });
 
-it("multimoora-rs default ranking matches the unrounded Python preferences", () => {
+it("ranks three alternatives using unrounded scores", () => {
   expect(rank(createProblem(false).scores, true)).toEqual([2, 1, 3]);
 });
 
-it("multimoora-rs second ranking matches the unrounded Python preferences", () => {
+it("ranks alternatives with four criteria using unrounded scores", () => {
   expect(rank(createProblem(true).scores, true)).toEqual([1, 3, 2, 4]);
 });

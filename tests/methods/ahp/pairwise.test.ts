@@ -6,7 +6,7 @@ import {
   ahpGeometricMean,
   ahpNormalizedColumnSum,
 } from "../../../src";
-// konkurencja/python/pyrepo_mcda_check-ahp-pairwise.py; pyrepo_mcda 0.1.8.
+
 const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(): AhpPairwiseDecisionProblem {
   const problem = new AhpPairwiseDecisionProblem();
@@ -26,7 +26,7 @@ function createProblem(): AhpPairwiseDecisionProblem {
   return problem;
 }
 describe("Classic AHP", () => {
-  it("matches Python _calculate_eigenvector", () => {
+  it("calculates priorities and scores using the principal eigenvector", () => {
     const problem = createProblem();
     problem.priorityMethod = ahpEigenvector;
     expect(rounded(ahpEigenvector(problem.alternativeMatrices[0]))).toEqual([
@@ -34,7 +34,7 @@ describe("Classic AHP", () => {
     ]);
     expect(rounded(problem.scores)).toEqual([0.4436, 0.3878, 0.1686]);
   });
-  it("matches Python _normalized_column_sum", () => {
+  it("calculates priorities and scores using normalized row sums", () => {
     const problem = createProblem();
     problem.priorityMethod = ahpNormalizedColumnSum;
     expect(rounded(ahpNormalizedColumnSum(problem.alternativeMatrices[0]))).toEqual([
@@ -42,7 +42,7 @@ describe("Classic AHP", () => {
     ]);
     expect(rounded(problem.scores)).toEqual([0.4383, 0.3871, 0.1746]);
   });
-  it("matches Python _geometric_mean", () => {
+  it("calculates priorities and scores using geometric means", () => {
     const problem = createProblem();
     problem.priorityMethod = ahpGeometricMean;
     expect(rounded(ahpGeometricMean(problem.alternativeMatrices[0]))).toEqual([
@@ -50,7 +50,7 @@ describe("Classic AHP", () => {
     ]);
     expect(rounded(problem.scores)).toEqual([0.4436, 0.3878, 0.1686]);
   });
-  it("matches Python consistency statistics", () => {
+  it("calculates consistency statistics for pairwise comparisons", () => {
     const stats = ahpConsistency(createProblem().alternativeMatrices[0]);
     expect(rounded([stats.lambdaMax, stats.consistencyIndex, stats.consistencyRatio!])).toEqual([
       3.0037, 0.0018, 0.0032,
@@ -122,7 +122,7 @@ describe("Classic AHP", () => {
   });
 });
 
-it("matches Python eigenvector and geometric means on four inconsistent alternatives", () => {
+it("distinguishes eigenvector and geometric mean priorities for inconsistent comparisons", () => {
   const matrix = [
     [1, 3, 5, 7],
     [1 / 3, 1, 2, 4],

@@ -11,7 +11,6 @@ import {
 } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-// Expected values from konkurencja/python/pyrepo_mcda_check-prosa-c.py (pyrepo_mcda 0.1.8).
 const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): ProsaCDecisionProblem {
   const problem = new ProsaCDecisionProblem();
@@ -36,10 +35,10 @@ function createProblem(second = false): ProsaCDecisionProblem {
 }
 
 describe("ProsaCDecisionProblem", () => {
-  it("matches the Python example to four decimal places", () => {
+  it("calculates scores for three alternatives", () => {
     expect(rounded(createProblem().scores)).toEqual([0.0, -0.088, -0.488]);
   });
-  it("matches the four-criterion Python example", () => {
+  it("calculates scores with four criteria and unequal weights", () => {
     expect(rounded(createProblem(true).scores)).toEqual([-0.0197, -0.2547, 0.0917, -0.5333]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
@@ -77,7 +76,7 @@ describe("ProsaCDecisionProblem", () => {
     problem.weights = [-1, 1, 1];
     expect(() => problem.scores).toThrow();
   });
-  it("matches Python _usual_function with custom s and thresholds", () => {
+  it("calculates scores with usual preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
     problem.s = [0.137, 0.293, 0.419];
     problem.preferenceFunctions = [3, 4, 500].map((p, j) => {
@@ -86,7 +85,7 @@ describe("ProsaCDecisionProblem", () => {
     });
     expect(rounded(problem.scores)).toEqual([0.0, -0.0316, -0.4316]);
   });
-  it("matches Python _ushape_function with custom s and thresholds", () => {
+  it("calculates scores with U-shaped preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
     problem.s = [0.137, 0.293, 0.419];
     problem.preferenceFunctions = [3, 4, 500].map((p, j) => {
@@ -95,7 +94,7 @@ describe("ProsaCDecisionProblem", () => {
     });
     expect(rounded(problem.scores)).toEqual([-0.2362, -0.0316, -0.232]);
   });
-  it("matches Python _vshape_function with custom s and thresholds", () => {
+  it("calculates scores with V-shaped preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
     problem.s = [0.137, 0.293, 0.419];
     problem.preferenceFunctions = [3, 4, 500].map((p, j) => {
@@ -104,7 +103,7 @@ describe("ProsaCDecisionProblem", () => {
     });
     expect(rounded(problem.scores)).toEqual([-0.0591, 0.0401, -0.2475]);
   });
-  it("matches Python _level_function with custom s and thresholds", () => {
+  it("calculates scores with level preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
     problem.s = [0.137, 0.293, 0.419];
     problem.preferenceFunctions = [3, 4, 500].map((p, j) => {
@@ -113,7 +112,7 @@ describe("ProsaCDecisionProblem", () => {
     });
     expect(rounded(problem.scores)).toEqual([-0.1181, -0.0158, -0.116]);
   });
-  it("matches Python _linear_function with custom s and thresholds", () => {
+  it("calculates scores with linear preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
     problem.s = [0.137, 0.293, 0.419];
     problem.preferenceFunctions = [3, 4, 500].map((p, j) => {
@@ -122,7 +121,7 @@ describe("ProsaCDecisionProblem", () => {
     });
     expect(rounded(problem.scores)).toEqual([-0.0787, 0.0358, -0.1777]);
   });
-  it("matches Python _gaussian_function with custom s and thresholds", () => {
+  it("calculates scores with Gaussian preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
     problem.s = [0.137, 0.293, 0.419];
     problem.preferenceFunctions = [3, 4, 500].map((p, j) => {
@@ -148,20 +147,19 @@ describe("ProsaCDecisionProblem", () => {
   });
 });
 
-it("prosa-c default ranking matches the unrounded Python preferences", () => {
+it("ranks three alternatives using unrounded scores", () => {
   expect(rank(createProblem(false).scores, true)).toEqual([1, 2, 3]);
 });
 
-it("prosa-c second ranking matches the unrounded Python preferences", () => {
+it("ranks alternatives with four criteria using unrounded scores", () => {
   expect(rank(createProblem(true).scores, true)).toEqual([2, 3, 1, 4]);
 });
 
-it("distinguishes NumPy ties-to-even from Math.round at a rounding boundary", () => {
+it("rounds negative halfway scores towards positive infinity", () => {
   const problem = createProblem();
   problem.s = [0.1, 0.3, 0.5];
   problem.preferenceFunctions = [0.5, 1, 100].map(uShapePreference);
-  // Python raw: [-0.238, -0.032000000000000056, -0.23775].
-  // NumPy round(4) gives -0.2378; JS-compatible rounding in the Python example gives -0.2377.
+  // Math.round maps the halfway value -0.23775 to -0.2377 at four decimal places.
   expect(rounded(problem.scores)).toEqual([-0.238, -0.032, -0.2377]);
   expect(problem.scores[2]).toBeCloseTo(-0.23775, 12);
 });

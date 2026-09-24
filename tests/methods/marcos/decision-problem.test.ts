@@ -2,7 +2,6 @@ import { describe, expect, it } from "@jest/globals";
 import { CriterionType, MarcosDecisionProblem } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-// Expected values from konkurencja/python/pyrepo_mcda_check-marcos.py (pyrepo_mcda 0.1.8).
 const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): MarcosDecisionProblem {
   const problem = new MarcosDecisionProblem();
@@ -27,10 +26,10 @@ function createProblem(second = false): MarcosDecisionProblem {
 }
 
 describe("MarcosDecisionProblem", () => {
-  it("matches the Python example to four decimal places", () => {
+  it("calculates scores for three alternatives", () => {
     expect(rounded(createProblem().scores)).toEqual([0.6415, 0.699, 0.6229]);
   });
-  it("matches the four-criterion Python example", () => {
+  it("calculates scores with four criteria and unequal weights", () => {
     expect(rounded(createProblem(true).scores)).toEqual([0.6964, 0.5909, 0.6439, 0.557]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
@@ -75,10 +74,10 @@ describe("MarcosDecisionProblem", () => {
   });
 });
 
-it("marcos default ranking matches the unrounded Python preferences", () => {
+it("ranks three alternatives using unrounded scores", () => {
   expect(rank(createProblem(false).scores, true)).toEqual([2, 1, 3]);
 });
 
-it("marcos second ranking matches the unrounded Python preferences", () => {
+it("ranks alternatives with four criteria using unrounded scores", () => {
   expect(rank(createProblem(true).scores, true)).toEqual([1, 3, 2, 4]);
 });

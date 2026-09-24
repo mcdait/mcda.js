@@ -1,7 +1,7 @@
 import { describe, expect, it } from "@jest/globals";
 import type { VikorSmaaResult } from "../../../src";
 import { VikorSmaaAnalysis, sumNormalizationCallback } from "../../../src";
-// konkurencja/python/pyrepo_mcda_check-vikor-smaa.py; pyrepo_mcda 0.1.8.
+
 const rounded = (matrix: number[][]) =>
   matrix.map((row) => row.map((x) => Math.round(x * 10000) / 10000));
 function createAnalysis(second = false): VikorSmaaAnalysis {
@@ -49,7 +49,7 @@ function verify(
   );
 }
 describe("VikorSmaaAnalysis", () => {
-  it("matches Python default to four decimals", () => {
+  it("calculates rank acceptability and central weights for three alternatives", () => {
     const analysis = createAnalysis(false);
 
     verify(
@@ -67,7 +67,7 @@ describe("VikorSmaaAnalysis", () => {
       [1, 2, 3],
     );
   });
-  it("matches Python second to four decimals", () => {
+  it("analyzes four alternatives with four criteria", () => {
     const analysis = createAnalysis(true);
 
     verify(
@@ -87,7 +87,7 @@ describe("VikorSmaaAnalysis", () => {
       [2, 3, 1, 4],
     );
   });
-  it("matches Python single to four decimals", () => {
+  it("analyzes a single weight sample", () => {
     const analysis = createAnalysis(false);
     analysis.weightSamples = analysis.weightSamples.slice(0, 1);
     verify(
@@ -105,7 +105,7 @@ describe("VikorSmaaAnalysis", () => {
       [1, 2, 3],
     );
   });
-  it("matches Python ties to four decimals", () => {
+  it("assigns equal ranks to tied alternatives", () => {
     const analysis = createAnalysis(false);
     analysis.matrix = [
       [1, 3],
@@ -129,7 +129,7 @@ describe("VikorSmaaAnalysis", () => {
       [2, 2, 1],
     );
   });
-  it("matches Python v_0 to four decimals", () => {
+  it("analyzes rankings with v set to zero", () => {
     const analysis = createAnalysis(false);
     analysis.v = 0;
     verify(
@@ -147,7 +147,7 @@ describe("VikorSmaaAnalysis", () => {
       [1, 3, 2],
     );
   });
-  it("matches Python v_1 to four decimals", () => {
+  it("analyzes rankings with v set to one", () => {
     const analysis = createAnalysis(false);
     analysis.v = 1;
     verify(
@@ -165,7 +165,7 @@ describe("VikorSmaaAnalysis", () => {
       [2, 1, 3],
     );
   });
-  it("matches Python normalized to four decimals", () => {
+  it("applies the configured normalization before analyzing rankings", () => {
     const analysis = createAnalysis(false);
     analysis.v = 0.3;
     analysis.normalizationCallback = sumNormalizationCallback;
@@ -246,7 +246,7 @@ describe("VikorSmaaAnalysis", () => {
   });
 });
 
-it("uses the Python equal-range VIKOR policy for SMAA", () => {
+it("preserves equal S and R contributions in the analysis", () => {
   const analysis = createAnalysis();
   analysis.matrix = [
     [1, 3],

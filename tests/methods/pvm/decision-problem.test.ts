@@ -2,7 +2,6 @@ import { describe, expect, it } from "@jest/globals";
 import { CriterionType, PvmCriterionType, PvmDecisionProblem } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-// Expected values from konkurencja/python/pyrepo_mcda_check-pvm.py (pyrepo_mcda 0.1.8).
 const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): PvmDecisionProblem {
   const problem = new PvmDecisionProblem();
@@ -34,10 +33,10 @@ function createProblem(second = false): PvmDecisionProblem {
 }
 
 describe("PvmDecisionProblem", () => {
-  it("matches the Python example to four decimal places", () => {
+  it("calculates scores for three alternatives", () => {
     expect(rounded(createProblem().scores)).toEqual([-0.0126, 0.0061, -0.0222]);
   });
-  it("matches the four-criterion Python example", () => {
+  it("calculates scores with four criteria and unequal weights", () => {
     expect(rounded(createProblem(true).scores)).toEqual([-0.0116, 0.026, 0.0048, 0.0411]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
@@ -75,28 +74,28 @@ describe("PvmDecisionProblem", () => {
     problem.weights = [-1, 1, 1];
     expect(() => problem.scores).toThrow();
   });
-  it("matches Python with explicit psi and phi", () => {
+  it("calculates scores using custom reference vectors", () => {
     const problem = createProblem(true);
     problem.psi = [10, 4, 170, 6];
     problem.phi = [3, 10, 250, 2];
     expect(rounded(problem.scores)).toEqual([0.0235, 0.0553, 0.0339, 0.0619]);
   });
-  it("matches Python for exclusively m criteria", () => {
+  it("calculates scores when all criteria are stimulants", () => {
     const problem = createProblem(true);
     problem.pvmTypes = Array(4).fill(PvmCriterionType.STIMULANT);
     expect(rounded(problem.scores)).toEqual([0.0061, 0.0604, 0.0365, 0.0651]);
   });
-  it("matches Python for exclusively dm criteria", () => {
+  it("calculates scores when all criteria are destimulants", () => {
     const problem = createProblem(true);
     problem.pvmTypes = Array(4).fill(PvmCriterionType.DESTIMULANT);
     expect(rounded(problem.scores)).toEqual([0.0811, 0.0268, 0.0507, 0.022]);
   });
-  it("matches Python for exclusively d criteria", () => {
+  it("calculates scores when all criteria use desired values", () => {
     const problem = createProblem(true);
     problem.pvmTypes = Array(4).fill(PvmCriterionType.DESIRED);
     expect(rounded(problem.scores)).toEqual([-0.1401, -0.0862, -0.0911, -0.0861]);
   });
-  it("matches Python for exclusively nd criteria", () => {
+  it("calculates scores when all criteria use undesired values", () => {
     const problem = createProblem(true);
     problem.pvmTypes = Array(4).fill(PvmCriterionType.UNDESIRED);
     expect(rounded(problem.scores)).toEqual([0.0874, 0.119, 0.0851, 0.1323]);
@@ -121,10 +120,10 @@ describe("PvmDecisionProblem", () => {
   });
 });
 
-it("pvm default ranking matches the unrounded Python preferences", () => {
+it("ranks three alternatives using unrounded scores", () => {
   expect(rank(createProblem(false).scores, true)).toEqual([2, 1, 3]);
 });
 
-it("pvm second ranking matches the unrounded Python preferences", () => {
+it("ranks alternatives with four criteria using unrounded scores", () => {
   expect(rank(createProblem(true).scores, true)).toEqual([4, 2, 3, 1]);
 });

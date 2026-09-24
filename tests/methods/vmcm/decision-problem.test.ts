@@ -2,7 +2,6 @@ import { describe, expect, it } from "@jest/globals";
 import { CriterionType, determineVmcmPatterns, VmcmDecisionProblem } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-// Expected values from konkurencja/python/pyrepo_mcda_check-vmcm.py (pyrepo_mcda 0.1.8).
 const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): VmcmDecisionProblem {
   const problem = new VmcmDecisionProblem();
@@ -27,10 +26,10 @@ function createProblem(second = false): VmcmDecisionProblem {
 }
 
 describe("VmcmDecisionProblem", () => {
-  it("matches the Python example to four decimal places", () => {
+  it("calculates scores for three alternatives", () => {
     expect(rounded(createProblem().scores)).toEqual([0.4928, 0.594, 0.4675]);
   });
-  it("matches the four-criterion Python example", () => {
+  it("calculates scores with four criteria and unequal weights", () => {
     expect(rounded(createProblem(true).scores)).toEqual([0.6021, 0.4584, 0.5704, 0.3968]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
@@ -68,12 +67,12 @@ describe("VmcmDecisionProblem", () => {
     problem.weights = [-1, 1, 1];
     expect(() => problem.scores).toThrow();
   });
-  it("matches Python sample standardization and linear quantiles", () => {
+  it("determines patterns using sample standardization and interpolated quartiles", () => {
     const problem = createProblem(true);
     expect(rounded(problem.pattern)).toEqual([0.4804, 0.6847, -0.5298, -0.5637]);
     expect(rounded(problem.antiPattern)).toEqual([-0.4804, -0.6847, 0.4636, 0.6765]);
   });
-  it("matches Python with explicit patterns", () => {
+  it("calculates scores using custom patterns", () => {
     const problem = createProblem(true);
     problem.pattern = [1, 2, -1, -2];
     problem.antiPattern = [-1, -2, 1, 2];
@@ -92,10 +91,10 @@ describe("VmcmDecisionProblem", () => {
   });
 });
 
-it("vmcm default ranking matches the unrounded Python preferences", () => {
+it("ranks three alternatives using unrounded scores", () => {
   expect(rank(createProblem(false).scores, true)).toEqual([2, 1, 3]);
 });
 
-it("vmcm second ranking matches the unrounded Python preferences", () => {
+it("ranks alternatives with four criteria using unrounded scores", () => {
   expect(rank(createProblem(true).scores, true)).toEqual([1, 3, 2, 4]);
 });

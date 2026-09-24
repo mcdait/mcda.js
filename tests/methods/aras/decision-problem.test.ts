@@ -2,7 +2,6 @@ import { describe, expect, it } from "@jest/globals";
 import { ArasDecisionProblem, CriterionType, sumNormalizationCallback } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-// Expected values from konkurencja/python/pyrepo_mcda_check-aras.py (pyrepo_mcda 0.1.8).
 const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): ArasDecisionProblem {
   const problem = new ArasDecisionProblem();
@@ -27,10 +26,10 @@ function createProblem(second = false): ArasDecisionProblem {
 }
 
 describe("ArasDecisionProblem", () => {
-  it("matches the Python example to four decimal places", () => {
+  it("calculates scores for three alternatives", () => {
     expect(rounded(createProblem().scores)).toEqual([0.8348, 0.9138, 0.8079]);
   });
-  it("matches the four-criterion Python example", () => {
+  it("calculates scores with four criteria and unequal weights", () => {
     expect(rounded(createProblem(true).scores)).toEqual([0.8157, 0.6727, 0.7412, 0.6429]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
@@ -88,11 +87,11 @@ describe("ArasDecisionProblem", () => {
   });
 });
 
-it("aras default ranking matches the unrounded Python preferences", () => {
+it("ranks three alternatives using unrounded scores", () => {
   expect(rank(createProblem(false).scores, true)).toEqual([2, 1, 3]);
 });
 
-it("aras second ranking matches the unrounded Python preferences", () => {
+it("ranks alternatives with four criteria using unrounded scores", () => {
   expect(rank(createProblem(true).scores, true)).toEqual([1, 3, 2, 4]);
 });
 
