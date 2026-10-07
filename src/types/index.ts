@@ -10,4 +10,6 @@ export type {
   MatrixInputInterface,
   MatrixObjectInputInterface,
   WeightsInputInterface,
+  NormalizationCallback,
+  ConfigurableNormalizationInterface,
 } from "./core";

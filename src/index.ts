@@ -11,6 +11,17 @@ export * from "./methods/topsis";
 export * from "./methods/vikor";
 export * from "./methods/spotis";
 export * from "./methods/saw";
+export * from "./methods/aras";
+export * from "./methods/copras";
+export * from "./methods/cradis";
+export * from "./methods/cocoso";
+export * from "./methods/marcos";
+export * from "./methods/ahp";
+export * from "./methods/multimoora";
+export * from "./methods/prosa-c";
+export * from "./methods/vmcm";
+export * from "./methods/pvm";
+export * from "./methods/vikor-smaa";
 
 // Common types
 export * from "./types";
