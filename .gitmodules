@@ -1,3 +1,0 @@
-[submodule "python"]
-	path = pyrepo-mcda
-	url = https://github.com/energyinpython/pyrepo-mcda.git
