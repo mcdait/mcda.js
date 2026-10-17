@@ -11,7 +11,7 @@ import {
   weighted,
 } from "../shared/numeric";
 
-/** Patterns are expressed in standardized coordinates, as in pyrepo_mcda. */
+/** Patterns are expressed in standardized coordinates. */
 export function determineVmcmPatterns(
   matrix: DecisionMatrix,
   types: CriterionType[],

@@ -34,7 +34,7 @@ export const rankPosition: CompromiseRankingCallback = (_preferences, ranks) => 
   );
 };
 
-/** Uses the intended formula; pyrepo_mcda 0.1.8 passes an extra normalization argument. */
+/** Aggregates component preferences and ranks using the improved Borda rule. */
 export const improvedBorda: CompromiseRankingCallback = (preferences, ranks) => {
   validateRanks(ranks);
   validateMatrix(ranks, ranks.length, 3);

@@ -70,7 +70,7 @@ export class VikorSmaaAnalysis {
       n = this.types.length,
       count = this.weightSamples.length;
     const preferences = this.weightSamples.map((w) => {
-      const scores = calculateVikor(matrix, w, this.v, "pyrepo").Q;
+      const scores = calculateVikor(matrix, w, this.v, "preserve").Q;
       finiteVector(scores, m, "VIKOR-SMAA preferences");
       return scores;
     });
@@ -83,7 +83,7 @@ export class VikorSmaaAnalysis {
         rankAcceptabilityIndex[i][r - 1] += 1;
         rankScores[i] += ranks.filter((other) => other > r).length;
       });
-      // Match pyrepo's argmin: only the first tied winner gets central weights.
+      // Only the first tied winner receives central weights for the sample.
       const winner = ranks.indexOf(Math.min(...ranks));
       this.weightSamples[iteration].forEach((w, j) => (centralWeightVectors[winner][j] += w));
     });
