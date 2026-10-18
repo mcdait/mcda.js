@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it, test } from "@jest/globals";
 import type { DecisionMatrix } from "../../../src/types";
 import { CriterionType } from "../../../src/types";
@@ -21,22 +22,47 @@ const bounds = [
 function createSpotisProblem(): SpotisDecisionProblem {
   const problem = new SpotisDecisionProblem();
 
-  problem.alternatives = alternatives;
-  problem.criteria = criteria;
-  problem.matrix = matrix;
-  problem.weights = weights;
-  problem.types = types;
-  problem.bounds = bounds;
+  problem.alternatives = [...alternatives];
+  problem.criteria = [...criteria];
+  problem.matrix = matrix.map((row) => [...row]);
+  problem.weights = [...weights];
+  problem.types = [...types];
+  problem.bounds = bounds.map((row) => [...row]);
 
   return problem;
 }
 
 describe("SpotisDecisionProblem", () => {
+  test("calculates scores for independently specified criterion bounds", () => {
+    const problem = createSpotisProblem();
+    problem.bounds = [
+      [0, 10],
+      [0, 12],
+      [800, 1600],
+    ];
+    expect(round4(problem.scores)).toEqual([0.3508, 0.27, 0.4025]);
+  });
+
+  test("assigns zero distance at the ideal and unit distance at the opposite bounds", () => {
+    const problem = new SpotisDecisionProblem();
+    problem.matrix = [
+      [10, 2],
+      [0, 8],
+    ];
+    problem.weights = [0.3, 0.7];
+    problem.types = [CriterionType.BENEFIT, CriterionType.COST];
+    problem.bounds = [
+      [0, 10],
+      [2, 8],
+    ];
+    expect(problem.isp).toEqual([10, 2]);
+    expect(round4(problem.scores)).toEqual([0, 1]);
+  });
+
   test("calculates scores", () => {
     const problem = createSpotisProblem();
-    const roundedScores = problem.scores.map((s) => Math.round(s * 10000) / 10000);
 
-    expect(roundedScores).toEqual([0.2532, 0.1777, 0.2936]);
+    expect(round4(problem.scores)).toEqual([0.2532, 0.1777, 0.2936]);
   });
 
   describe("validations", () => {

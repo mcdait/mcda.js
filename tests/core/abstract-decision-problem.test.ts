@@ -18,6 +18,17 @@ class TestDecisionProblem extends AbstractDecisionProblem {
 }
 
 describe("AbstractDecisionProblem", () => {
+  test("matches criterion keys when subsequent objects use another property order", () => {
+    const problem = new TestDecisionProblem();
+    problem.matrixObj = { A: { quality: 1, cost: 2 }, B: { cost: 4, quality: 3 } };
+    expect(problem.criteria).toEqual(["quality", "cost"]);
+    expect(problem.matrix).toEqual([
+      [1, 2],
+      [3, 4],
+    ]);
+    expect(problem.matrixObj).toEqual({ A: { quality: 1, cost: 2 }, B: { quality: 3, cost: 4 } });
+  });
+
   test("stores data assigned through regular setters", () => {
     const problem = new TestDecisionProblem();
 

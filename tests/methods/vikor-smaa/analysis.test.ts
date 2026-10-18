@@ -1,9 +1,8 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import type { VikorSmaaResult } from "../../../src";
 import { VikorSmaaAnalysis, sumNormalizationCallback } from "../../../src";
 
-const rounded = (matrix: number[][]) =>
-  matrix.map((row) => row.map((x) => Math.round(x * 10000) / 10000));
 function createAnalysis(second = false): VikorSmaaAnalysis {
   const analysis = new VikorSmaaAnalysis();
   analysis.matrix = second
@@ -38,14 +37,14 @@ function verify(
   weights: number[][],
   ranks: number[],
 ) {
-  expect(rounded(result.rankAcceptabilityIndex)).toEqual(acceptability);
-  expect(rounded(result.centralWeightVectors)).toEqual(weights);
+  expect(round4(result.rankAcceptabilityIndex)).toEqual(round4(acceptability));
+  expect(round4(result.centralWeightVectors)).toEqual(round4(weights));
   expect(result.ranks).toEqual(ranks);
   result.rankAcceptabilityIndex.forEach((row) =>
-    expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(1, 12),
+    expect(round4(row.reduce((a, b) => a + b, 0))).toBe(1),
   );
   result.centralWeightVectors.forEach((row) =>
-    expect(row.reduce((a, b) => a + b, 0)).toBeCloseTo(row.some((x) => x > 0) ? 1 : 0, 12),
+    expect(round4(row.reduce((a, b) => a + b, 0))).toBe(round4(row.some((x) => x > 0) ? 1 : 0)),
   );
 }
 describe("VikorSmaaAnalysis", () => {

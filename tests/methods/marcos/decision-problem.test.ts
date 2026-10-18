@@ -1,8 +1,8 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CriterionType, MarcosDecisionProblem } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): MarcosDecisionProblem {
   const problem = new MarcosDecisionProblem();
   problem.matrix = second
@@ -27,10 +27,10 @@ function createProblem(second = false): MarcosDecisionProblem {
 
 describe("MarcosDecisionProblem", () => {
   it("calculates scores for three alternatives", () => {
-    expect(rounded(createProblem().scores)).toEqual([0.6415, 0.699, 0.6229]);
+    expect(round4(createProblem().scores)).toEqual([0.6415, 0.699, 0.6229]);
   });
   it("calculates scores with four criteria and unequal weights", () => {
-    expect(rounded(createProblem(true).scores)).toEqual([0.6964, 0.5909, 0.6439, 0.557]);
+    expect(round4(createProblem(true).scores)).toEqual([0.6964, 0.5909, 0.6439, 0.557]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
     const problem = createProblem();
@@ -55,17 +55,26 @@ describe("MarcosDecisionProblem", () => {
     problem.scores;
     expect(problem.debugBag).toBeUndefined();
   });
-  it("rejects malformed matrices, non-finite data and invalid weights", () => {
+  it.each([
+    {
+      label: "empty matrix",
+      matrix: [],
+      weights: [0.4, 0.35, 0.25],
+      error: /at least one alternative/,
+    },
+    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
+    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "negative weight",
+      matrix: [[1, 2, 3]],
+      weights: [-1, 1, 1],
+      error: /Weights must be non-negative/,
+    },
+  ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
-    problem.matrix = [];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[NaN, 2, 3]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2, 3]];
-    problem.weights = [-1, 1, 1];
-    expect(() => problem.scores).toThrow();
+    problem.matrix = matrix.map((row) => [...row]);
+    problem.weights = [...weights];
+    expect(() => problem.scores).toThrow(error);
   });
   it("rejects zero values outside the method's domain", () => {
     const problem = createProblem();

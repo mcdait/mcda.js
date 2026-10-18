@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import {
   CriterionType,
@@ -11,7 +12,6 @@ import {
 } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): ProsaCDecisionProblem {
   const problem = new ProsaCDecisionProblem();
   problem.matrix = second
@@ -36,10 +36,10 @@ function createProblem(second = false): ProsaCDecisionProblem {
 
 describe("ProsaCDecisionProblem", () => {
   it("calculates scores for three alternatives", () => {
-    expect(rounded(createProblem().scores)).toEqual([0.0, -0.088, -0.488]);
+    expect(round4(createProblem().scores)).toEqual([0, -0.088, -0.488]);
   });
   it("calculates scores with four criteria and unequal weights", () => {
-    expect(rounded(createProblem(true).scores)).toEqual([-0.0197, -0.2547, 0.0917, -0.5333]);
+    expect(round4(createProblem(true).scores)).toEqual([-0.0197, -0.2547, 0.0917, -0.5333]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
     const problem = createProblem();
@@ -64,17 +64,26 @@ describe("ProsaCDecisionProblem", () => {
     problem.scores;
     expect(problem.debugBag).toBeUndefined();
   });
-  it("rejects malformed matrices, non-finite data and invalid weights", () => {
+  it.each([
+    {
+      label: "empty matrix",
+      matrix: [],
+      weights: [0.4, 0.35, 0.25],
+      error: /at least one alternative/,
+    },
+    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
+    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "negative weight",
+      matrix: [[1, 2, 3]],
+      weights: [-1, 1, 1],
+      error: /Weights must be non-negative/,
+    },
+  ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
-    problem.matrix = [];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[NaN, 2, 3]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2, 3]];
-    problem.weights = [-1, 1, 1];
-    expect(() => problem.scores).toThrow();
+    problem.matrix = matrix.map((row) => [...row]);
+    problem.weights = [...weights];
+    expect(() => problem.scores).toThrow(error);
   });
   it("calculates scores with usual preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
@@ -83,7 +92,7 @@ describe("ProsaCDecisionProblem", () => {
       const q = [0.5, 1, 100][j];
       return usualPreference;
     });
-    expect(rounded(problem.scores)).toEqual([0.0, -0.0316, -0.4316]);
+    expect(round4(problem.scores)).toEqual([0, -0.0316, -0.4316]);
   });
   it("calculates scores with U-shaped preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
@@ -92,7 +101,7 @@ describe("ProsaCDecisionProblem", () => {
       const q = [0.5, 1, 100][j];
       return uShapePreference(q);
     });
-    expect(rounded(problem.scores)).toEqual([-0.2362, -0.0316, -0.232]);
+    expect(round4(problem.scores)).toEqual([-0.2362, -0.0316, -0.232]);
   });
   it("calculates scores with V-shaped preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
@@ -101,7 +110,7 @@ describe("ProsaCDecisionProblem", () => {
       const q = [0.5, 1, 100][j];
       return vShapePreference(p);
     });
-    expect(rounded(problem.scores)).toEqual([-0.0591, 0.0401, -0.2475]);
+    expect(round4(problem.scores)).toEqual([-0.0591, 0.0401, -0.2475]);
   });
   it("calculates scores with level preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
@@ -110,7 +119,7 @@ describe("ProsaCDecisionProblem", () => {
       const q = [0.5, 1, 100][j];
       return levelPreference(p, q);
     });
-    expect(rounded(problem.scores)).toEqual([-0.1181, -0.0158, -0.116]);
+    expect(round4(problem.scores)).toEqual([-0.1181, -0.0158, -0.116]);
   });
   it("calculates scores with linear preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
@@ -119,7 +128,7 @@ describe("ProsaCDecisionProblem", () => {
       const q = [0.5, 1, 100][j];
       return linearPreference(p, q);
     });
-    expect(rounded(problem.scores)).toEqual([-0.0787, 0.0358, -0.1777]);
+    expect(round4(problem.scores)).toEqual([-0.0787, 0.0358, -0.1777]);
   });
   it("calculates scores with Gaussian preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
@@ -128,12 +137,12 @@ describe("ProsaCDecisionProblem", () => {
       const q = [0.5, 1, 100][j];
       return gaussianPreference(p, q);
     });
-    expect(rounded(problem.scores)).toEqual([-0.0465, 0.0281, -0.153]);
+    expect(round4(problem.scores)).toEqual([-0.0465, 0.0281, -0.153]);
   });
   it("reduces to PROMETHEE net flows when s=0", () => {
     const problem = createProblem();
     problem.s = [0, 0, 0];
-    expect(rounded(problem.scores)).toEqual([0, 0.2, -0.2]);
+    expect(round4(problem.scores)).toEqual([0, 0.2, -0.2]);
   });
   it("rejects invalid s, preference functions and a single alternative", () => {
     const problem = createProblem();
@@ -155,13 +164,12 @@ it("ranks alternatives with four criteria using unrounded scores", () => {
   expect(rank(createProblem(true).scores, true)).toEqual([2, 3, 1, 4]);
 });
 
-it("rounds negative halfway scores towards positive infinity", () => {
+it("rounds negative scores to four decimals at a halfway boundary", () => {
   const problem = createProblem();
   problem.s = [0.1, 0.3, 0.5];
   problem.preferenceFunctions = [0.5, 1, 100].map(uShapePreference);
-  // Math.round maps the halfway value -0.23775 to -0.2377 at four decimal places.
-  expect(rounded(problem.scores)).toEqual([-0.238, -0.032, -0.2377]);
-  expect(problem.scores[2]).toBeCloseTo(-0.23775, 12);
+  expect(round4(problem.scores)).toEqual([-0.238, -0.032, -0.2377]);
+  expect(round4(problem.scores[2])).toBe(-0.2377);
 });
 
 it("exposes criterion flows and weighted sustainability penalties", () => {
@@ -173,5 +181,5 @@ it("exposes criterion flows and weighted sustainability penalties", () => {
     [-1, 1, 1],
     [1, -1, -1],
   ]);
-  expect(rounded(problem.debugBag?.deviations as number[])).toEqual([0, 0.288, 0.288]);
+  expect(round4(problem.debugBag?.deviations as number[])).toEqual([0, 0.288, 0.288]);
 });

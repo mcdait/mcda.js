@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, test } from "@jest/globals";
 import {
   gaussianPreference,
@@ -22,7 +23,7 @@ describe("PROMETHEE preference functions", () => {
   test.each(preferenceCases)(
     "%s calculates a preference",
     (_, preferenceFunction, expectedPreference) => {
-      expect(preferenceFunction(2)).toBeCloseTo(expectedPreference);
+      expect(round4(preferenceFunction(2))).toBe(round4(expectedPreference));
     },
   );
 

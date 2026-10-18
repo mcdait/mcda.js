@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import {
   CriterionType,
@@ -14,7 +15,6 @@ const preferences = [
   [0.5, -0.4, 0.3, 0],
   [0.8, -0.6, 0.3, 0.2],
 ];
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 
 describe("DariaAnalysis", () => {
   it.each([
@@ -27,8 +27,8 @@ describe("DariaAnalysis", () => {
       const analysis = new DariaAnalysis();
       analysis.matrix = preferences;
       analysis.variabilityCallback = callback;
-      expect(rounded(analysis.result.variability)).toEqual([...variability]);
-      expect(rounded(analysis.scores)).toEqual([...scores]);
+      expect(round4(analysis.result.variability)).toEqual(round4([...variability]));
+      expect(round4(analysis.scores)).toEqual(round4([...scores]));
       expect(analysis.result.direction).toEqual([1, 1, 0, 1]);
       expect(analysis.result.directionLabels).toEqual(["↑", "↑", "=", "↑"]);
     },
@@ -36,8 +36,8 @@ describe("DariaAnalysis", () => {
 
   it("calculates entropy diversity and sample coefficient of variation", () => {
     const matrix = preferences.map((row) => row.slice(0, 3));
-    expect(rounded(entropyVariability(matrix))).toEqual([0.117, 0.0344, 0]);
-    expect(rounded(coefficientOfVariationVariability(matrix))).toEqual([0.6, 0.3333, 0]);
+    expect(round4(entropyVariability(matrix))).toEqual([0.117, 0.0344, 0]);
+    expect(round4(coefficientOfVariationVariability(matrix))).toEqual([0.6, 0.3333, 0]);
   });
 
   it("uses raw direction for corrections and preference type only for labels", () => {
@@ -50,7 +50,7 @@ describe("DariaAnalysis", () => {
     analysis.preferenceType = CriterionType.COST;
     expect(analysis.result.direction).toEqual([-1, 1, 0]);
     expect(analysis.result.directionLabels).toEqual(["↑", "↓", "="]);
-    expect(rounded(analysis.scores)).toEqual([0.1835, 2.8165, 2]);
+    expect(round4(analysis.scores)).toEqual([0.1835, 2.8165, 2]);
   });
 
   it("returns unchanged scores for one period and constant preferences", () => {

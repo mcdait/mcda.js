@@ -1,8 +1,8 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CradisDecisionProblem, CriterionType, ratioNormalizationCallback } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): CradisDecisionProblem {
   const problem = new CradisDecisionProblem();
   problem.matrix = second
@@ -27,10 +27,10 @@ function createProblem(second = false): CradisDecisionProblem {
 
 describe("CradisDecisionProblem", () => {
   it("calculates scores for three alternatives", () => {
-    expect(rounded(createProblem().scores)).toEqual([0.5983, 0.7504, 0.5551]);
+    expect(round4(createProblem().scores)).toEqual([0.5983, 0.7504, 0.5551]);
   });
   it("calculates scores with four criteria and unequal weights", () => {
-    expect(rounded(createProblem(true).scores)).toEqual([0.606, 0.4459, 0.5222, 0.4005]);
+    expect(round4(createProblem(true).scores)).toEqual([0.606, 0.4459, 0.5222, 0.4005]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
     const problem = createProblem();
@@ -55,26 +55,43 @@ describe("CradisDecisionProblem", () => {
     problem.scores;
     expect(problem.debugBag).toBeUndefined();
   });
-  it("rejects malformed matrices, non-finite data and invalid weights", () => {
+  it.each([
+    {
+      label: "empty matrix",
+      matrix: [],
+      weights: [0.4, 0.35, 0.25],
+      error: /at least one alternative/,
+    },
+    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
+    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "negative weight",
+      matrix: [[1, 2, 3]],
+      weights: [-1, 1, 1],
+      error: /Weights must be non-negative/,
+    },
+  ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
-    problem.matrix = [];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[NaN, 2, 3]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2, 3]];
-    problem.weights = [-1, 1, 1];
-    expect(() => problem.scores).toThrow();
+    problem.matrix = matrix.map((row) => [...row]);
+    problem.weights = [...weights];
+    expect(() => problem.scores).toThrow(error);
   });
-  it("requires a callback and rejects malformed callback results", () => {
+  it("requires a normalization callback", () => {
     const problem = createProblem();
     problem.normalizationCallback = undefined;
     expect(() => problem.scores).toThrow(/normalization callback/);
-    problem.normalizationCallback = () => [[1]];
-    expect(() => problem.scores).toThrow();
-    problem.normalizationCallback = (matrix) => matrix.map((row) => row.map(() => Infinity));
-    expect(() => problem.scores).toThrow();
+  });
+  it.each([
+    { label: "missing rows", callback: () => [[1]], error: /dimensions/ },
+    {
+      label: "non-finite values",
+      callback: (matrix: number[][]) => matrix.map((row) => row.map(() => Infinity)),
+      error: /finite/,
+    },
+  ])("rejects normalization with $label", ({ callback, error }) => {
+    const problem = createProblem();
+    problem.normalizationCallback = callback;
+    expect(() => problem.scores).toThrow(error);
   });
 });
 

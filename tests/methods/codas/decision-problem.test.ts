@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CodasDecisionProblem } from "../../../src/methods/codas";
 import type { CodasDebugResults } from "../../../src/methods/codas";
@@ -28,13 +29,12 @@ describe("CodasDecisionProblem", () => {
   it("ranks alternatives by their distance from the negative ideal solution", () => {
     const problem = createCodasProblem();
     const scores = problem.scores;
-    const roundedScores = scores.map((score) => Math.round(score * 10000) / 10000);
     const rankedAlternatives = problem.alternatives
       .map((alternative, index) => ({ alternative, score: scores[index] ?? 0 }))
       .sort((left, right) => right.score - left.score)
       .map(({ alternative }) => alternative);
 
-    expect(roundedScores).toEqual([-0.1442, 0.2928, -0.1486]);
+    expect(round4(scores)).toEqual([-0.1442, 0.2928, -0.1486]);
     expect(rankedAlternatives).toEqual(["Laptop B", "Laptop A", "Laptop C"]);
   });
 
@@ -45,17 +45,13 @@ describe("CodasDecisionProblem", () => {
     problem.types = [CriterionType.BENEFIT];
     problem.normalizationCallback = () => [[0.5], [0.49]];
 
-    const scoresWithoutTaxicabDistance = problem.scores.map(
-      (score) => Math.round(score * 10000) / 10000,
-    );
-    expect(scoresWithoutTaxicabDistance).toEqual([0.01, -0.01]);
+    const scoresWithoutTaxicabDistance = problem.scores;
+    expect(round4(scoresWithoutTaxicabDistance)).toEqual([0.01, -0.01]);
 
     problem.tau = 0.005;
 
-    const scoresWithTaxicabDistance = problem.scores.map(
-      (score) => Math.round(score * 10000) / 10000,
-    );
-    expect(scoresWithTaxicabDistance).toEqual([0.02, -0.02]);
+    const scoresWithTaxicabDistance = problem.scores;
+    expect(round4(scoresWithTaxicabDistance)).toEqual([0.02, -0.02]);
   });
 
   describe("validations", () => {

@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { WaspasDecisionProblem } from "../../../src/methods/waspas";
 import type { WaspasDebugResults } from "../../../src/methods/waspas";
@@ -28,13 +29,12 @@ describe("WaspasDecisionProblem", () => {
   it("calculates appraisal scores and ranks alternatives", () => {
     const problem = createWaspasProblem();
     const scores = problem.scores;
-    const roundedScores = scores.map((score) => Math.round(score * 10000) / 10000);
     const rankedAlternatives = problem.alternatives
       .map((alternative, index) => ({ alternative, score: scores[index] ?? 0 }))
       .sort((left, right) => right.score - left.score)
       .map(({ alternative }) => alternative);
 
-    expect(roundedScores).toEqual([0.8354, 0.9077, 0.8048]);
+    expect(round4(scores)).toEqual([0.8354, 0.9077, 0.8048]);
     expect(rankedAlternatives).toEqual(["Laptop B", "Laptop A", "Laptop C"]);
   });
 
@@ -43,9 +43,11 @@ describe("WaspasDecisionProblem", () => {
     problem.enableDebug(true);
 
     problem.lambda = 1;
+    expect(round4(problem.scores)).toEqual([0.8361, 0.9111, 0.8119]);
     expect(problem.scores).toEqual((problem.debugBag as WaspasDebugResults).weightedSumScores);
 
     problem.lambda = 0;
+    expect(round4(problem.scores)).toEqual([0.8347, 0.9044, 0.7977]);
     expect(problem.scores).toEqual((problem.debugBag as WaspasDebugResults).weightedProductScores);
   });
 

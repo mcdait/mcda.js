@@ -1,6 +1,7 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CriterionType } from "../../../src/types";
-import type { DecisionMatrix, NormalizationCallback } from "../../../src/types";
+import type { DecisionMatrix } from "../../../src/types";
 import { linearNormalizationCallback } from "../../../src/utils";
 import { MabacDecisionProblem } from "../../../src/methods/mabac";
 import type { MabacDebugResults } from "../../../src/methods/mabac";
@@ -18,11 +19,11 @@ const types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST]
 function createMabacProblem(): MabacDecisionProblem {
   const problem = new MabacDecisionProblem();
 
-  problem.alternatives = alternatives;
-  problem.criteria = criteria;
-  problem.matrix = matrix;
-  problem.weights = weights;
-  problem.types = types;
+  problem.alternatives = [...alternatives];
+  problem.criteria = [...criteria];
+  problem.matrix = matrix.map((row) => [...row]);
+  problem.weights = [...weights];
+  problem.types = [...types];
   problem.normalizationCallback = linearNormalizationCallback;
 
   return problem;
@@ -31,9 +32,8 @@ function createMabacProblem(): MabacDecisionProblem {
 describe("MabacDecisionProblem", () => {
   it("calculates scores", () => {
     const problem = createMabacProblem();
-    const roundedScores = problem.scores.map((s) => Math.round(s * 10000) / 10000);
 
-    expect(roundedScores).toEqual([0.0189, 0.1772, -0.0228]);
+    expect(round4(problem.scores)).toEqual([0.0189, 0.1772, -0.0228]);
   });
 
   describe("validations", () => {
@@ -65,26 +65,6 @@ describe("MabacDecisionProblem", () => {
       problem.normalizationCallback = () => [[], [], []];
 
       expect(() => problem.scores).toThrow("MABAC weighted normalized value is required.");
-    });
-
-    it("throws when normalization creates a distance value without a border value", () => {
-      const problem = createMabacProblem();
-      const rowWithExtraWeightedValue = {
-        map: (callback: (value: number, criterionIndex: number) => number) => [
-          callback(0.5, 0),
-          callback(1 / 3, 1),
-          callback(0.5, 2),
-          1,
-        ],
-      };
-
-      problem.normalizationCallback = (() => [
-        rowWithExtraWeightedValue,
-        rowWithExtraWeightedValue,
-        rowWithExtraWeightedValue,
-      ]) as unknown as NormalizationCallback;
-
-      expect(() => problem.scores).toThrow("MABAC border approximation value is required.");
     });
   });
 

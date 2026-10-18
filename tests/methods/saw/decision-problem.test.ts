@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { SawDecisionProblem } from "../../../src/methods/saw";
 import type { SawDebugResults } from "../../../src/methods/saw";
@@ -25,13 +26,12 @@ describe("SawDecisionProblem", () => {
   it("calculates preference scores and ranks alternatives", () => {
     const problem = createSawProblem();
     const scores = problem.scores;
-    const roundedScores = scores.map((score) => Math.round(score * 10000) / 10000);
     const rankedAlternatives = problem.alternatives
       .map((alternative, index) => ({ alternative, score: scores[index] ?? 0 }))
       .sort((left, right) => right.score - left.score)
       .map(({ alternative }) => alternative);
 
-    expect(roundedScores).toEqual([0.3265, 0.358, 0.3155]);
+    expect(round4(scores)).toEqual([0.3265, 0.358, 0.3155]);
     expect(rankedAlternatives).toEqual(["Laptop B", "Laptop A", "Laptop C"]);
   });
 

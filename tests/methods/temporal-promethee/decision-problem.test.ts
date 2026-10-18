@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import {
   TemporalPrometheeDecisionProblem,
@@ -31,7 +32,6 @@ function createProblem(): TemporalPrometheeDecisionProblem {
   problem.types = [1, 1, -1];
   return problem;
 }
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 
 describe("TemporalPrometheeDecisionProblem", () => {
   it("calculates default flows, variability and corrected scores", () => {
@@ -40,17 +40,17 @@ describe("TemporalPrometheeDecisionProblem", () => {
       [0, 0.2, -0.2],
       [0.4, -0.6, 0.2],
       [1, -0.25, -0.75],
-    ].forEach((row, i) => expect(rounded(result.netFlows[i])).toEqual(row));
-    expect(rounded(result.variability)).toEqual([0.411, 0.3274, 0.3894]);
-    expect(rounded(result.scores)).toEqual([1.411, -0.5774, -1.1394]);
+    ].forEach((row, i) => expect(round4(result.netFlows[i])).toEqual(round4(row)));
+    expect(round4(result.variability)).toEqual([0.411, 0.3274, 0.3894]);
+    expect(round4(result.scores)).toEqual([1.411, -0.5774, -1.1394]);
     expect(result.direction).toEqual([1, -1, -1]);
     expect(rank(result.scores)).toEqual([1, 2, 3]);
   });
   it("calculates signed Gini corrections", () => {
     const problem = createProblem();
     problem.variabilityCallback = giniVariability;
-    expect(rounded(problem.result.variability)).toEqual([0.4762, -0.8205, -0.8444]);
-    expect(rounded(problem.scores)).toEqual([1.4762, 0.5705, 0.0944]);
+    expect(round4(problem.result.variability)).toEqual([0.4762, -0.8205, -0.8444]);
+    expect(round4(problem.scores)).toEqual([1.4762, 0.5705, 0.0944]);
   });
   it("calculates flows and corrected scores with linear preference functions", () => {
     const problem = createProblem();
@@ -59,15 +59,15 @@ describe("TemporalPrometheeDecisionProblem", () => {
       linearPreference(4, 0.5),
       linearPreference(500, 100),
     ];
-    expect(rounded(problem.scores)).toEqual([0.6555, -0.2469, -0.5061]);
-    expect(rounded(problem.result.variability)).toEqual([0.2073, 0.1531, 0.1517]);
+    expect(round4(problem.scores)).toEqual([0.6555, -0.2469, -0.5061]);
+    expect(round4(problem.result.variability)).toEqual([0.2073, 0.1531, 0.1517]);
     expect(problem.result.direction).toEqual([1, -1, -1]);
     const flows = [
       [-0.05, 0.2107, -0.1607],
       [0.1143, -0.1312, 0.017],
       [0.4482, -0.0937, -0.3545],
     ];
-    flows.forEach((row, i) => expect(rounded(problem.result.netFlows[i])).toEqual(row));
+    flows.forEach((row, i) => expect(round4(problem.result.netFlows[i])).toEqual(round4(row)));
   });
   it("reduces to existing PROMETHEE for one period and preserves input order", () => {
     const problem = createProblem();
@@ -83,7 +83,7 @@ describe("TemporalPrometheeDecisionProblem", () => {
     const reverse = createProblem();
     reverse.matrices.reverse();
     expect(reverse.result.direction).toEqual([-1, 1, 1]);
-    expect(rounded(reverse.scores)).toEqual([-0.411, 0.5274, 0.1894]);
+    expect(round4(reverse.scores)).toEqual([-0.411, 0.5274, 0.1894]);
   });
   it("supports names, recomputation, diagnostics and callback isolation", () => {
     const problem = createProblem();

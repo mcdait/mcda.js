@@ -7,7 +7,6 @@ import {
   rankPosition,
 } from "../../../src";
 
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): MultimooraDecisionProblem {
   const problem = new MultimooraDecisionProblem();
   problem.matrix = second
@@ -32,10 +31,10 @@ function createProblem(second = false): MultimooraDecisionProblem {
 
 describe("MultimooraDecisionProblem", () => {
   it("calculates scores for three alternatives", () => {
-    expect(rounded(createProblem().scores)).toEqual([2, 1, 3]);
+    expect(createProblem().scores).toEqual([2, 1, 3]);
   });
   it("calculates scores with four criteria and unequal weights", () => {
-    expect(rounded(createProblem(true).scores)).toEqual([1, 2, 1, 2]);
+    expect(createProblem(true).scores).toEqual([1, 2, 1, 2]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
     const problem = createProblem();
@@ -60,17 +59,26 @@ describe("MultimooraDecisionProblem", () => {
     problem.scores;
     expect(problem.debugBag).toBeUndefined();
   });
-  it("rejects malformed matrices, non-finite data and invalid weights", () => {
+  it.each([
+    {
+      label: "empty matrix",
+      matrix: [],
+      weights: [0.4, 0.35, 0.25],
+      error: /at least one alternative/,
+    },
+    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
+    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "negative weight",
+      matrix: [[1, 2, 3]],
+      weights: [-1, 1, 1],
+      error: /Weights must be non-negative/,
+    },
+  ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
-    problem.matrix = [];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[NaN, 2, 3]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2, 3]];
-    problem.weights = [-1, 1, 1];
-    expect(() => problem.scores).toThrow();
+    problem.matrix = matrix.map((row) => [...row]);
+    problem.weights = [...weights];
+    expect(() => problem.scores).toThrow(error);
   });
   it("combines component rankings using the Copeland method", () => {
     const problem = createProblem(true);

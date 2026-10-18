@@ -1,8 +1,8 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CriterionType, MultimooraFmfDecisionProblem } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): MultimooraFmfDecisionProblem {
   const problem = new MultimooraFmfDecisionProblem();
   problem.matrix = second
@@ -26,11 +26,25 @@ function createProblem(second = false): MultimooraFmfDecisionProblem {
 }
 
 describe("MultimooraFmfDecisionProblem", () => {
+  it.each([
+    [0.9, 0.1],
+    [0.1, 0.9],
+  ])("preserves multiplicative weighting for weights %j", (...weights) => {
+    const problem = new MultimooraFmfDecisionProblem();
+    problem.matrix = [
+      [9, 1],
+      [1, 8],
+    ];
+    problem.types = [1, 1];
+    problem.weights = weights;
+    expect(round4(problem.scores)).toEqual([0.0111, 0.0099]);
+    expect(rank(problem.scores)).toEqual([1, 2]);
+  });
   it("calculates scores for three alternatives", () => {
-    expect(rounded(createProblem().scores)).toEqual([0.3055, 0.4124, 0.2525]);
+    expect(round4(createProblem().scores)).toEqual([0.3055, 0.4124, 0.2525]);
   });
   it("calculates scores with four criteria and unequal weights", () => {
-    expect(rounded(createProblem(true).scores)).toEqual([2.2007, 1.2838, 1.9562, 0.9825]);
+    expect(round4(createProblem(true).scores)).toEqual([2.2007, 1.2838, 1.9562, 0.9825]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
     const problem = createProblem();
@@ -55,17 +69,26 @@ describe("MultimooraFmfDecisionProblem", () => {
     problem.scores;
     expect(problem.debugBag).toBeUndefined();
   });
-  it("rejects malformed matrices, non-finite data and invalid weights", () => {
+  it.each([
+    {
+      label: "empty matrix",
+      matrix: [],
+      weights: [0.4, 0.35, 0.25],
+      error: /at least one alternative/,
+    },
+    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
+    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "negative weight",
+      matrix: [[1, 2, 3]],
+      weights: [-1, 1, 1],
+      error: /Weights must be non-negative/,
+    },
+  ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
-    problem.matrix = [];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[NaN, 2, 3]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2, 3]];
-    problem.weights = [-1, 1, 1];
-    expect(() => problem.scores).toThrow();
+    problem.matrix = matrix.map((row) => [...row]);
+    problem.weights = [...weights];
+    expect(() => problem.scores).toThrow(error);
   });
   it("rejects zero values outside the method's domain", () => {
     const problem = createProblem();
