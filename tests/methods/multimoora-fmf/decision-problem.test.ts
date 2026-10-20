@@ -74,26 +74,36 @@ describe("MultimooraFmfDecisionProblem", () => {
       label: "empty matrix",
       matrix: [],
       weights: [0.4, 0.35, 0.25],
-      error: /at least one alternative/,
+      error: "Decision problem requires at least one alternative.",
     },
-    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
-    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "ragged row",
+      matrix: [[1, 2]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem matrix rows must match the weights length.",
+    },
+    {
+      label: "NaN value",
+      matrix: [[NaN, 2, 3]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Matrix row must contain 3 finite values.",
+    },
     {
       label: "negative weight",
       matrix: [[1, 2, 3]],
       weights: [-1, 1, 1],
-      error: /Weights must be non-negative/,
+      error: "Weights must be non-negative with a positive sum.",
     },
   ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
     problem.matrix = matrix.map((row) => [...row]);
     problem.weights = [...weights];
-    expect(() => problem.scores).toThrow(error);
+    expect(() => problem.scores).toThrow(new Error(error));
   });
   it("rejects zero values outside the method's domain", () => {
     const problem = createProblem();
     problem.matrix[0][0] = 0;
-    expect(() => problem.scores).toThrow(/positive/);
+    expect(() => problem.scores).toThrow(new Error("MULTIMOORA FMF requires positive values."));
   });
 });
 

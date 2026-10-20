@@ -60,38 +60,54 @@ describe("ArasDecisionProblem", () => {
       label: "empty matrix",
       matrix: [],
       weights: [0.4, 0.35, 0.25],
-      error: /at least one alternative/,
+      error: "Decision problem requires at least one alternative.",
     },
-    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
-    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "ragged row",
+      matrix: [[1, 2]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem matrix rows must match the weights length.",
+    },
+    {
+      label: "NaN value",
+      matrix: [[NaN, 2, 3]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Matrix row must contain 3 finite values.",
+    },
     {
       label: "negative weight",
       matrix: [[1, 2, 3]],
       weights: [-1, 1, 1],
-      error: /Weights must be non-negative/,
+      error: "Weights must be non-negative with a positive sum.",
     },
   ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
     problem.matrix = matrix.map((row) => [...row]);
     problem.weights = [...weights];
-    expect(() => problem.scores).toThrow(error);
+    expect(() => problem.scores).toThrow(new Error(error));
   });
   it("requires a normalization callback", () => {
     const problem = createProblem();
     problem.normalizationCallback = undefined;
-    expect(() => problem.scores).toThrow(/normalization callback/);
+    expect(() => problem.scores).toThrow(
+      new Error("This method requires a normalization callback."),
+    );
   });
   it.each([
-    { label: "missing rows", callback: () => [[1]], error: /dimensions/ },
+    {
+      label: "missing rows",
+      callback: () => [[1]],
+      error: "Matrix must have non-empty, matching dimensions.",
+    },
     {
       label: "non-finite values",
       callback: (matrix: number[][]) => matrix.map((row) => row.map(() => Infinity)),
-      error: /finite/,
+      error: "Matrix row must contain 3 finite values.",
     },
   ])("rejects normalization with $label", ({ callback, error }) => {
     const problem = createProblem();
     problem.normalizationCallback = callback;
-    expect(() => problem.scores).toThrow(error);
+    expect(() => problem.scores).toThrow(new Error(error));
   });
   it("adds the ideal before normalizing", () => {
     const problem = createProblem();

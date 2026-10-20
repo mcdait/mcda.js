@@ -86,21 +86,27 @@ describe("AhpDecisionProblem", () => {
     ).toBeUndefined();
   });
   it("reports failure to converge", () => {
-    expect(() => eigenvectorPriority(createProblem().matrix[0], 1e-15, 1)).toThrow(/converge/);
+    expect(() => eigenvectorPriority(createProblem().matrix[0], 1e-15, 1)).toThrow(
+      new Error("AHP eigenvector calculation did not converge."),
+    );
   });
   it("rejects invalid matrices, weights and callback priorities", () => {
     const problem = createProblem();
     problem.matrix[0][0][0] = 2;
-    expect(() => problem.scores).toThrow(/diagonal/);
+    expect(() => problem.scores).toThrow(new Error("AHP pairwise diagonal must equal 1."));
     const nonReciprocal = createProblem();
     nonReciprocal.matrix[0][0][1] = 4;
-    expect(() => nonReciprocal.scores).toThrow(/reciprocal/);
+    expect(() => nonReciprocal.scores).toThrow(
+      new Error("AHP pairwise matrices must be positive and reciprocal."),
+    );
     const other = createProblem();
     other.weights = [1];
-    expect(() => other.scores).toThrow();
+    expect(() => other.scores).toThrow(new Error("Weights must contain 2 finite values."));
     other.weights = [0.6, 0.4];
     other.priorityMethod = () => [1, 1, 1];
-    expect(() => other.scores).toThrow(/sum to 1/);
+    expect(() => other.scores).toThrow(
+      new Error("AHP priority vectors must be non-negative and sum to 1."),
+    );
   });
   it("supports recomputation and optional debug without mutating the matrices", () => {
     const problem = createProblem();
@@ -164,14 +170,26 @@ it("accepts weights calculated from comparisons of criteria", () => {
 it("validates optional alternative and criterion names", () => {
   const problem = createProblem();
   problem.alternatives = ["A"];
-  expect(() => problem.scores).toThrow(/alternative name/);
+  expect(() => problem.scores).toThrow(
+    new Error(
+      "Decision problem requires one alternative name per alternative when alternative names are provided.",
+    ),
+  );
   problem.alternatives = ["A", "B", " "];
-  expect(() => problem.scores).toThrow(/alternative name/);
+  expect(() => problem.scores).toThrow(
+    new Error("Decision problem alternative names cannot be empty."),
+  );
   problem.alternatives = [];
   problem.criteria = ["Price"];
-  expect(() => problem.scores).toThrow(/criterion name/);
+  expect(() => problem.scores).toThrow(
+    new Error(
+      "Decision problem requires one criterion name per criterion when criterion names are provided.",
+    ),
+  );
   problem.criteria = ["Price", ""];
-  expect(() => problem.scores).toThrow(/criterion name/);
+  expect(() => problem.scores).toThrow(
+    new Error("Decision problem criterion names cannot be empty."),
+  );
   problem.criteria = [];
   expect(round4(problem.scores)).toEqual([0.4436, 0.3878, 0.1686]);
 });
@@ -179,7 +197,7 @@ it("validates optional alternative and criterion names", () => {
 it("requires equally sized square matrices and one weight per criterion", () => {
   const problem = createProblem();
   problem.matrix = [];
-  expect(() => problem.scores).toThrow();
+  expect(() => problem.scores).toThrow(new Error("Classic AHP requires pairwise matrices."));
   problem.matrix = [
     [
       [1, 2],
@@ -187,10 +205,12 @@ it("requires equally sized square matrices and one weight per criterion", () => 
     ],
     [[1]],
   ];
-  expect(() => problem.scores).toThrow();
+  expect(() => problem.scores).toThrow(
+    new Error("Matrix must have non-empty, matching dimensions."),
+  );
   problem.matrix = [[[1, 2], [0.5]]];
   problem.weights = [1];
-  expect(() => problem.scores).toThrow();
+  expect(() => problem.scores).toThrow(new Error("Matrix row must contain 2 finite values."));
   problem.matrix = [
     [
       [1, 2],
@@ -198,7 +218,7 @@ it("requires equally sized square matrices and one weight per criterion", () => 
     ],
   ];
   problem.weights = [0.5, 0.5];
-  expect(() => problem.scores).toThrow();
+  expect(() => problem.scores).toThrow(new Error("Weights must contain 1 finite values."));
 });
 
 it("reports inconsistent comparisons through debug without blocking scores", () => {

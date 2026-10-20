@@ -30,6 +30,54 @@ function createTopsisProblem(): TopsisDecisionProblem {
 }
 
 describe("TopsisDecisionProblem", () => {
+  test("TOPSIS rejects a normalization result with missing alternatives", () => {
+    const problem = new TopsisDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = () => [[1]];
+    expect(() => problem.scores).toThrow(
+      new Error("Matrix must have non-empty, matching dimensions."),
+    );
+  });
+
+  test.each([
+    { label: "missing column", normalized: [[1], []] },
+    {
+      label: "extra column",
+      normalized: [
+        [1, 2],
+        [3, 4],
+      ],
+    },
+    { label: "NaN", normalized: [[NaN], [1]] },
+    { label: "infinity", normalized: [[1], [Infinity]] },
+  ])("TOPSIS rejects normalization with $label", ({ normalized }) => {
+    const problem = new TopsisDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = () => normalized;
+    expect(() => problem.scores).toThrow(new Error("Matrix row must contain 1 finite values."));
+  });
+
+  test("isolates normalization callback mutations", () => {
+    const problem = new TopsisDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   test("preserves alternative order under row permutation", () => {
     const original = createTopsisProblem();
     const permuted = createTopsisProblem();
@@ -86,6 +134,6 @@ describe("TopsisDecisionProblem", () => {
     problem.weights = [...weights];
     problem.types = [...types];
 
-    expect(() => problem.scores).toThrow("TOPSIS requires a normalization callback.");
+    expect(() => problem.scores).toThrow(new Error("TOPSIS requires a normalization callback."));
   });
 });

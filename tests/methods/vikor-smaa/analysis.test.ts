@@ -222,26 +222,45 @@ describe("VikorSmaaAnalysis", () => {
   });
   it("rejects absent, malformed, zero and non-finite weight samples", () => {
     const analysis = createAnalysis();
-    for (const samples of [[], [[1, 2]], [[0, 0, 0]], [[NaN, 0, 1]], [[-1, 1, 1]]]) {
+    const expectedErrors = [
+      "VIKOR-SMAA requires at least one weight sample.",
+      "Matrix row must contain 2 finite values.",
+      "Weights must be non-negative with a positive sum.",
+      "Weights must contain 3 finite values.",
+      "Weights must be non-negative with a positive sum.",
+    ];
+    for (const [caseIndex, samples] of [
+      [],
+      [[1, 2]],
+      [[0, 0, 0]],
+      [[NaN, 0, 1]],
+      [[-1, 1, 1]],
+    ].entries()) {
       analysis.weightSamples = samples;
-      expect(() => analysis.result).toThrow();
+      expect(() => analysis.result).toThrow(new Error(expectedErrors[caseIndex]));
     }
   });
   it.each([-1, 2, Infinity, NaN])("rejects v=%s", (v) => {
     const analysis = createAnalysis();
     analysis.v = v;
-    expect(() => analysis.result).toThrow();
+    expect(() => analysis.result).toThrow(new Error("VIKOR-SMAA v must be between 0 and 1."));
   });
   it("rejects constant criteria and invalid callback results", () => {
     const analysis = createAnalysis();
     analysis.normalizationCallback = () => [[1]];
-    expect(() => analysis.result).toThrow();
+    expect(() => analysis.result).toThrow(
+      new Error("Matrix must have non-empty, matching dimensions."),
+    );
     analysis.normalizationCallback = undefined;
     analysis.matrix = [
       [1, 2, 3],
       [1, 4, 5],
     ];
-    expect(() => analysis.result).toThrow(/equal values/);
+    expect(() => analysis.result).toThrow(
+      new Error(
+        "Criteria with indexes 0 contain equal values for all alternatives. VIKOR cannot be applied.",
+      ),
+    );
   });
 });
 

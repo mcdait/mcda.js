@@ -29,6 +29,23 @@ function createVikorProblem(): VikorDecisionProblem {
 }
 
 describe("VikorDecisionProblem", () => {
+  it("isolates normalization callback mutations", () => {
+    const problem = new VikorDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   it("calculates scores", () => {
     const problem = createVikorProblem();
 
@@ -42,7 +59,7 @@ describe("VikorDecisionProblem", () => {
       problem.normalizationCallback = undefined;
 
       expect(() => problem.scores).toThrow(
-        "This VIKOR implementation requires a normalization callback.",
+        new Error("This VIKOR implementation requires a normalization callback."),
       );
     });
 
@@ -51,7 +68,7 @@ describe("VikorDecisionProblem", () => {
 
       problem.v = -0.1;
 
-      expect(() => problem.scores).toThrow("VIKOR parameter v must be between 0 and 1.");
+      expect(() => problem.scores).toThrow(new Error("VIKOR parameter v must be between 0 and 1."));
     });
 
     it("throws when v > 1", () => {
@@ -59,7 +76,7 @@ describe("VikorDecisionProblem", () => {
 
       problem.v = 1.1;
 
-      expect(() => problem.scores).toThrow("VIKOR parameter v must be between 0 and 1.");
+      expect(() => problem.scores).toThrow(new Error("VIKOR parameter v must be between 0 and 1."));
     });
 
     it("accepts when v = 0", () => {

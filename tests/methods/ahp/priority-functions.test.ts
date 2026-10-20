@@ -10,7 +10,13 @@ describe.each([eigenvectorPriority, geometricMeanPriority, normalizedRowSumPrior
   "%p",
   (calculatePriority) => {
     it("rejects empty, ragged, non-positive and non-finite matrices", () => {
-      for (const matrix of [
+      const expectedErrors = [
+        "Matrix must have non-empty, matching dimensions.",
+        "Matrix row must contain 2 finite values.",
+        "Priority calculations require a positive matrix.",
+        "Matrix row must contain 2 finite values.",
+      ];
+      for (const [caseIndex, matrix] of [
         [],
         [[1, 2], [1]],
         [
@@ -21,8 +27,8 @@ describe.each([eigenvectorPriority, geometricMeanPriority, normalizedRowSumPrior
           [1, Infinity],
           [1, 1],
         ],
-      ]) {
-        expect(() => calculatePriority(matrix)).toThrow();
+      ].entries()) {
+        expect(() => calculatePriority(matrix)).toThrow(new Error(expectedErrors[caseIndex]));
       }
     });
 
@@ -68,15 +74,22 @@ describe("priority methods on inconsistent pairwise comparisons", () => {
   });
 
   it.each([0, -1, NaN, Infinity])("rejects tolerance=%s", (tolerance) => {
-    expect(() => eigenvectorPriority([[1]], tolerance)).toThrow(/iteration settings/);
+    expect(() => eigenvectorPriority([[1]], tolerance)).toThrow(
+      new Error("AHP iteration settings must be positive and finite."),
+    );
   });
 
   it.each([0, -1, 1.5, NaN, Infinity])("rejects maxIterations=%s", (iterations) => {
-    expect(() => eigenvectorPriority([[1]], 1e-12, iterations)).toThrow(/iteration settings/);
+    expect(() => eigenvectorPriority([[1]], 1e-12, iterations)).toThrow(
+      new Error("AHP iteration settings must be positive and finite."),
+    );
   });
 
-  it.each([eigenvectorPriority, normalizedRowSumPriority])("%p reports overflow", (calculate) => {
+  it.each([
+    { calculate: eigenvectorPriority, error: "AHP eigenvector calculation overflowed." },
+    { calculate: normalizedRowSumPriority, error: "AHP row sum overflowed." },
+  ])("%p reports overflow", ({ calculate, error }) => {
     const matrix = Array.from({ length: 2 }, () => [Number.MAX_VALUE, Number.MAX_VALUE]);
-    expect(() => calculate(matrix)).toThrow(/overflow/);
+    expect(() => calculate(matrix)).toThrow(new Error(error));
   });
 });

@@ -107,7 +107,15 @@ describe("TemporalPrometheeDecisionProblem", () => {
   });
   it("rejects empty, ragged, mismatched and non-finite periods", () => {
     const problem = createProblem();
-    for (const matrices of [
+    const expectedErrors = [
+      "Temporal PROMETHEE requires at least one period.",
+      "Temporal PROMETHEE requires at least two alternatives.",
+      "Temporal PROMETHEE requires at least two alternatives.",
+      "Matrix must have non-empty, matching dimensions.",
+      "Matrix row must contain 3 finite values.",
+      "Matrix row must contain 3 finite values.",
+    ];
+    for (const [caseIndex, matrices] of [
       [],
       [[]],
       [[[1, 2, 3]]],
@@ -130,28 +138,42 @@ describe("TemporalPrometheeDecisionProblem", () => {
           [4, 5, 6],
         ],
       ],
-    ]) {
+    ].entries()) {
       problem.matrices = matrices;
-      expect(() => problem.scores).toThrow();
+      expect(() => problem.scores).toThrow(new Error(expectedErrors[caseIndex]));
     }
   });
   it("rejects invalid weights, types, names and callbacks", () => {
     const problem = createProblem();
     problem.weights = [-0.4, 0.35, 0.25];
-    expect(() => problem.result).toThrow();
+    expect(() => problem.result).toThrow(
+      new Error("Weights must be non-negative with a positive sum."),
+    );
     problem.weights = [0.4, 0.35, 0.25];
     problem.types = [1, 1];
-    expect(() => problem.result).toThrow();
+    expect(() => problem.result).toThrow(
+      new Error("One benefit or cost type is required per criterion."),
+    );
     problem.types = [1, 1, -1];
     problem.alternatives = ["A"];
-    expect(() => problem.result).toThrow(/alternative/);
+    expect(() => problem.result).toThrow(
+      new Error(
+        "Decision problem requires one alternative name per alternative when alternative names are provided.",
+      ),
+    );
     problem.alternatives = [];
     problem.preferenceFunctions = [usualPreference];
-    expect(() => problem.result).toThrow(/preference function/);
+    expect(() => problem.result).toThrow(
+      new Error("Temporal PROMETHEE requires one callable preference function per criterion."),
+    );
     problem.preferenceFunctions = [() => NaN, usualPreference, usualPreference];
-    expect(() => problem.result).toThrow(/finite/);
+    expect(() => problem.result).toThrow(
+      new Error("PROMETHEE preference function must return a finite number between 0 and 1."),
+    );
     problem.preferenceFunctions = [];
     problem.variabilityCallback = () => [Infinity, 0, 0];
-    expect(() => problem.result).toThrow(/finite/);
+    expect(() => problem.result).toThrow(
+      new Error("DARIA variability must contain 3 finite values."),
+    );
   });
 });

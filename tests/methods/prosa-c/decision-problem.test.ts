@@ -69,21 +69,31 @@ describe("ProsaCDecisionProblem", () => {
       label: "empty matrix",
       matrix: [],
       weights: [0.4, 0.35, 0.25],
-      error: /at least one alternative/,
+      error: "Decision problem requires at least one alternative.",
     },
-    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
-    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "ragged row",
+      matrix: [[1, 2]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem matrix rows must match the weights length.",
+    },
+    {
+      label: "NaN value",
+      matrix: [[NaN, 2, 3]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Matrix row must contain 3 finite values.",
+    },
     {
       label: "negative weight",
       matrix: [[1, 2, 3]],
       weights: [-1, 1, 1],
-      error: /Weights must be non-negative/,
+      error: "Weights must be non-negative with a positive sum.",
     },
   ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
     problem.matrix = matrix.map((row) => [...row]);
     problem.weights = [...weights];
-    expect(() => problem.scores).toThrow(error);
+    expect(() => problem.scores).toThrow(new Error(error));
   });
   it("calculates scores with usual preferences and custom sustainability coefficients", () => {
     const problem = createProblem();
@@ -147,12 +157,16 @@ describe("ProsaCDecisionProblem", () => {
   it("rejects invalid s, preference functions and a single alternative", () => {
     const problem = createProblem();
     problem.s = [0.3];
-    expect(() => problem.scores).toThrow();
+    expect(() => problem.scores).toThrow(
+      new Error("PROSA-C sustainability coefficients must contain 3 finite values."),
+    );
     problem.s = undefined;
     problem.preferenceFunctions = [() => 2, () => 0, () => 0];
-    expect(() => problem.scores).toThrow();
+    expect(() => problem.scores).toThrow(
+      new Error("Preference functions must return finite values between 0 and 1."),
+    );
     problem.matrix = [problem.matrix[0]];
-    expect(() => problem.scores).toThrow(/two alternatives/);
+    expect(() => problem.scores).toThrow(new Error("PROSA-C requires at least two alternatives."));
   });
 });
 

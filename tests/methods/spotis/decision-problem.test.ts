@@ -33,6 +33,35 @@ function createSpotisProblem(): SpotisDecisionProblem {
 }
 
 describe("SpotisDecisionProblem", () => {
+  test("SPOTIS rejects equal bounds before dividing by their range", () => {
+    const problem = new SpotisDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.bounds = [[1, 1]];
+    expect(() => problem.scores).toThrow(
+      new Error("SPOTIS bounds must be finite [lower, upper] pairs with a positive finite range."),
+    );
+  });
+
+  test.each([
+    { label: "missing endpoint", bounds: [0] },
+    { label: "extra endpoint", bounds: [0, 2, 3] },
+    { label: "reversed endpoints", bounds: [2, 0] },
+    { label: "NaN endpoint", bounds: [NaN, 2] },
+    { label: "infinite endpoint", bounds: [0, Infinity] },
+    { label: "overflowing range", bounds: [-Number.MAX_VALUE, Number.MAX_VALUE] },
+  ])("SPOTIS rejects $label", ({ bounds }) => {
+    const problem = new SpotisDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.bounds = [bounds];
+    expect(() => problem.scores).toThrow(
+      new Error("SPOTIS bounds must be finite [lower, upper] pairs with a positive finite range."),
+    );
+  });
+
   test("calculates scores for independently specified criterion bounds", () => {
     const problem = createSpotisProblem();
     problem.bounds = [
@@ -72,7 +101,7 @@ describe("SpotisDecisionProblem", () => {
       problem.bounds = [];
 
       expect(() => problem.scores).toThrow(
-        "The number of bounds (0) must match the number of criteria (3).",
+        new Error("The number of bounds (0) must match the number of criteria (3)."),
       );
     });
   });

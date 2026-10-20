@@ -86,30 +86,45 @@ describe("DariaAnalysis", () => {
     expect(analysis.debugBag).toBeUndefined();
   });
 
-  it.each([[], [[]], [[1, 2], [1]], [[NaN]], [[Infinity]]].map((matrix) => ({ matrix })))(
-    "rejects malformed preferences (%#)",
-    ({ matrix }) => {
-      const analysis = new DariaAnalysis();
-      analysis.matrix = matrix;
-      expect(() => analysis.result).toThrow();
-    },
-  );
+  it.each([
+    { matrix: [], error: "Matrix must have non-empty, matching dimensions." },
+    { matrix: [[]], error: "Matrix must have non-empty, matching dimensions." },
+    { matrix: [[1, 2], [1]], error: "Matrix row must contain 2 finite values." },
+    { matrix: [[NaN]], error: "Matrix row must contain 1 finite values." },
+    { matrix: [[Infinity]], error: "Matrix row must contain 1 finite values." },
+  ])("rejects malformed preferences (%#)", ({ matrix, error }) => {
+    const analysis = new DariaAnalysis();
+    analysis.matrix = matrix;
+    expect(() => analysis.result).toThrow(new Error(error));
+  });
   it("rejects invalid ordering and callback results", () => {
     const analysis = new DariaAnalysis();
     analysis.matrix = preferences;
     analysis.preferenceType = 0 as CriterionType;
-    expect(() => analysis.scores).toThrow(/preference type/);
+    expect(() => analysis.scores).toThrow(new Error("DARIA preference type must be 1 or -1."));
     analysis.preferenceType = CriterionType.BENEFIT;
     for (const values of [[1], [NaN, 0, 0, 0], [Infinity, 0, 0, 0]]) {
       analysis.variabilityCallback = () => values;
-      expect(() => analysis.scores).toThrow(/finite values/);
+      expect(() => analysis.scores).toThrow(
+        new Error("DARIA variability must contain 4 finite values."),
+      );
     }
   });
   it("rejects undefined variability divisors", () => {
-    expect(() => giniVariability([[0]])).toThrow(/divisor/);
-    expect(() => entropyVariability([[1]])).toThrow(/divisor/);
-    expect(() => entropyVariability([[1], [-1]])).toThrow(/divisor/);
-    expect(() => coefficientOfVariationVariability([[1]])).toThrow(/divisor/);
-    expect(() => coefficientOfVariationVariability([[0], [0]])).toThrow(/divisor/);
+    expect(() => giniVariability([[0]])).toThrow(
+      new Error("The method is undefined because a divisor is zero or non-finite."),
+    );
+    expect(() => entropyVariability([[1]])).toThrow(
+      new Error("The method is undefined because a divisor is zero or non-finite."),
+    );
+    expect(() => entropyVariability([[1], [-1]])).toThrow(
+      new Error("The method is undefined because a divisor is zero or non-finite."),
+    );
+    expect(() => coefficientOfVariationVariability([[1]])).toThrow(
+      new Error("The method is undefined because a divisor is zero or non-finite."),
+    );
+    expect(() => coefficientOfVariationVariability([[0], [0]])).toThrow(
+      new Error("The method is undefined because a divisor is zero or non-finite."),
+    );
   });
 });

@@ -30,6 +30,23 @@ function createMabacProblem(): MabacDecisionProblem {
 }
 
 describe("MabacDecisionProblem", () => {
+  it("isolates normalization callback mutations", () => {
+    const problem = new MabacDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   it("calculates scores", () => {
     const problem = createMabacProblem();
 
@@ -43,7 +60,7 @@ describe("MabacDecisionProblem", () => {
       problem.normalizationCallback = undefined;
 
       expect(() => problem.scores).toThrow(
-        "This MABAC implementation requires a normalization callback.",
+        new Error("This MABAC implementation requires a normalization callback."),
       );
     });
 
@@ -56,7 +73,7 @@ describe("MabacDecisionProblem", () => {
         [1, 0, 0, 1],
       ];
 
-      expect(() => problem.scores).toThrow("MABAC criterion weight is required.");
+      expect(() => problem.scores).toThrow(new Error("MABAC criterion weight is required."));
     });
 
     it("throws when normalization returns too few weighted values", () => {
@@ -64,7 +81,9 @@ describe("MabacDecisionProblem", () => {
 
       problem.normalizationCallback = () => [[], [], []];
 
-      expect(() => problem.scores).toThrow("MABAC weighted normalized value is required.");
+      expect(() => problem.scores).toThrow(
+        new Error("MABAC weighted normalized value is required."),
+      );
     });
   });
 

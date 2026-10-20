@@ -26,6 +26,23 @@ function createWaspasProblem(): WaspasDecisionProblem {
 }
 
 describe("WaspasDecisionProblem", () => {
+  it("isolates normalization callback mutations", () => {
+    const problem = new WaspasDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   it("calculates appraisal scores and ranks alternatives", () => {
     const problem = createWaspasProblem();
     const scores = problem.scores;
@@ -57,7 +74,7 @@ describe("WaspasDecisionProblem", () => {
       problem.normalizationCallback = undefined;
 
       expect(() => problem.scores).toThrow(
-        "This WASPAS implementation requires a normalization callback.",
+        new Error("This WASPAS implementation requires a normalization callback."),
       );
     });
 
@@ -65,7 +82,9 @@ describe("WaspasDecisionProblem", () => {
       const problem = createWaspasProblem();
       problem.lambda = 1.01;
 
-      expect(() => problem.scores).toThrow("WASPAS parameter lambda must be between 0 and 1.");
+      expect(() => problem.scores).toThrow(
+        new Error("WASPAS parameter lambda must be between 0 and 1."),
+      );
     });
 
     it("requires the normalized matrix to preserve its dimensions", () => {
@@ -73,7 +92,7 @@ describe("WaspasDecisionProblem", () => {
       problem.normalizationCallback = () => [[1, 1, 1]];
 
       expect(() => problem.scores).toThrow(
-        "WASPAS normalized matrix must contain one row per alternative.",
+        new Error("WASPAS normalized matrix must contain one row per alternative."),
       );
     });
 
@@ -86,7 +105,7 @@ describe("WaspasDecisionProblem", () => {
       ];
 
       expect(() => problem.scores).toThrow(
-        "WASPAS normalized matrix values must be non-negative and finite.",
+        new Error("WASPAS normalized matrix values must be non-negative and finite."),
       );
     });
   });

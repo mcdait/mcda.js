@@ -37,7 +37,7 @@ export class VikorDecisionProblem extends AbstractNormalizedDecisionProblem {
       throw new Error("This VIKOR implementation requires a normalization callback.");
     }
     const results = calculateVikor(
-      this.normalizationCallback(this.matrix, this.types),
+      this.normalizeMatrix(this.normalizationCallback),
       this.weights,
       this.v,
     );

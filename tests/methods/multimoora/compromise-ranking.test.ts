@@ -22,7 +22,11 @@ describe("compromise ranking contracts", () => {
       { label: "fractional", ranks: [[1.5], [1]] },
       { label: "out of range", ranks: [[3], [1]] },
     ])("rejects $label ranks", ({ ranks }) => {
-      expect(() => aggregate([], ranks)).toThrow(/integer ranks/);
+      expect(() => aggregate([], ranks)).toThrow(
+        new Error(
+          "Compromise rankings require integer ranks from 1 to the number of alternatives.",
+        ),
+      );
     });
   });
 });

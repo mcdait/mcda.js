@@ -26,6 +26,34 @@ function createCodasProblem(): CodasDecisionProblem {
 }
 
 describe("CodasDecisionProblem", () => {
+  it("CODAS rejects non-finite normalized values", () => {
+    const problem = new CodasDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = () => [[NaN], [1]];
+    expect(() => problem.scores).toThrow(
+      new Error("CODAS normalized matrix values must be finite."),
+    );
+  });
+
+  it("isolates normalization callback mutations", () => {
+    const problem = new CodasDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   it("ranks alternatives by their distance from the negative ideal solution", () => {
     const problem = createCodasProblem();
     const scores = problem.scores;
@@ -60,7 +88,7 @@ describe("CodasDecisionProblem", () => {
       problem.normalizationCallback = undefined;
 
       expect(() => problem.scores).toThrow(
-        "This CODAS implementation requires a normalization callback.",
+        new Error("This CODAS implementation requires a normalization callback."),
       );
     });
 
@@ -69,7 +97,7 @@ describe("CodasDecisionProblem", () => {
       problem.tau = -0.01;
 
       expect(() => problem.scores).toThrow(
-        "CODAS threshold tau must be a non-negative finite number.",
+        new Error("CODAS threshold tau must be a non-negative finite number."),
       );
     });
 
@@ -78,7 +106,7 @@ describe("CodasDecisionProblem", () => {
       problem.normalizationCallback = () => [[1, 1, 1]];
 
       expect(() => problem.scores).toThrow(
-        "CODAS normalized matrix must contain one row per alternative.",
+        new Error("CODAS normalized matrix must contain one row per alternative."),
       );
     });
   });

@@ -39,7 +39,7 @@ export class WaspasDecisionProblem extends AbstractNormalizedDecisionProblem {
       throw new Error("This WASPAS implementation requires a normalization callback.");
     }
 
-    const normalizedMatrix = this.normalizationCallback(this.matrix, this.types);
+    const normalizedMatrix = this.normalizeMatrix(this.normalizationCallback);
     this.validateNormalizedMatrix(normalizedMatrix);
     this.addToDebugBag("normalizedMatrix", normalizedMatrix);
 

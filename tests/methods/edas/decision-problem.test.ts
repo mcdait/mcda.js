@@ -56,7 +56,7 @@ describe("EdasDecisionProblem", () => {
     ];
 
     expect(() => problem.scores).toThrow(
-      "EDAS average solution for criterion at index 0 must not be zero.",
+      new Error("EDAS average solution for criterion at index 0 must not be zero."),
     );
   });
 

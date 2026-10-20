@@ -60,21 +60,31 @@ describe("VmcmDecisionProblem", () => {
       label: "empty matrix",
       matrix: [],
       weights: [0.4, 0.35, 0.25],
-      error: /at least one alternative/,
+      error: "Decision problem requires at least one alternative.",
     },
-    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
-    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "ragged row",
+      matrix: [[1, 2]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem matrix rows must match the weights length.",
+    },
+    {
+      label: "NaN value",
+      matrix: [[NaN, 2, 3]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Matrix row must contain 3 finite values.",
+    },
     {
       label: "negative weight",
       matrix: [[1, 2, 3]],
       weights: [-1, 1, 1],
-      error: /Weights must be non-negative/,
+      error: "Weights must be non-negative with a positive sum.",
     },
   ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
     problem.matrix = matrix.map((row) => [...row]);
     problem.weights = [...weights];
-    expect(() => problem.scores).toThrow(error);
+    expect(() => problem.scores).toThrow(new Error(error));
   });
   it("determines patterns using sample standardization and interpolated quartiles", () => {
     const problem = createProblem(true);
@@ -93,10 +103,12 @@ describe("VmcmDecisionProblem", () => {
       [1, 2, 3],
       [1, 3, 4],
     ];
-    expect(() => problem.scores).toThrow(/constant/);
+    expect(() => problem.scores).toThrow(new Error("Cannot standardize a constant criterion."));
     const other = createProblem();
     other.pattern = [...other.antiPattern];
-    expect(() => other.scores).toThrow(/divisor/);
+    expect(() => other.scores).toThrow(
+      new Error("The method is undefined because a divisor is zero or non-finite."),
+    );
   });
 });
 

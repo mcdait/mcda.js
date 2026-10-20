@@ -26,13 +26,13 @@ describe("vectorNormalizationCallback", () => {
 
   it("throws when matrix has no alternatives", () => {
     expect(() => vectorNormalizationCallback([], [])).toThrow(
-      "Decision problem matrix requires at least one alternative.",
+      new Error("Decision problem matrix requires at least one alternative."),
     );
   });
 
   it("throws when criterion divisor is zero", () => {
     expect(() => vectorNormalizationCallback([[0], [0]], [CriterionType.BENEFIT])).toThrow(
-      "Cannot normalize criterion at index 0 because the divisor is zero.",
+      new Error("Cannot normalize criterion at index 0 because the divisor is zero."),
     );
   });
 });
@@ -95,7 +95,7 @@ describe("maxNormalizationCallback", () => {
 
   it("throws if any max is 0", () => {
     expect(() => maxNormalizationCallback([[0], [-5]], [CriterionType.BENEFIT])).toThrow(
-      "Cannot normalize criterion at index 0 because the maximum value is zero.",
+      new Error("Cannot normalize criterion at index 0 because the maximum value is zero."),
     );
   });
 });
@@ -120,7 +120,7 @@ describe("minMaxNormalizationCallback", () => {
 
   it("throws for criteria with identical values", () => {
     expect(() => minMaxNormalizationCallback([[5], [5]], [CriterionType.BENEFIT])).toThrow(
-      "Cannot normalize criterion at index 0 because all values are equal.",
+      new Error("Cannot normalize criterion at index 0 because all values are equal."),
     );
   });
 });
@@ -169,7 +169,7 @@ describe("sumNormalizationCallback", () => {
         ],
         [CriterionType.BENEFIT, CriterionType.COST],
       ),
-    ).toThrow("Cannot normalize criterion at index 1 because it contains zero values");
+    ).toThrow(new Error("Cannot normalize criterion at index 1 because it contains zero values"));
   });
 
   it("throws if any criterion has negative value", () => {
@@ -182,7 +182,7 @@ describe("sumNormalizationCallback", () => {
         ],
         [CriterionType.BENEFIT, CriterionType.BENEFIT],
       ),
-    ).toThrow("Sum normalization requires that none of the values are negative");
+    ).toThrow(new Error("Sum normalization requires that none of the values are negative"));
   });
 });
 
@@ -207,14 +207,24 @@ describe("Additional normalizations", () => {
     ]);
   });
   it("rejects zero divisors and malformed matrices", () => {
-    expect(() => ratioNormalizationCallback([[0, 1]], [1, -1])).toThrow();
+    expect(() => ratioNormalizationCallback([[0, 1]], [1, -1])).toThrow(
+      new Error(
+        "Ratio normalization requires positive finite values and matching criterion types.",
+      ),
+    );
     expect(() =>
       vectorMagnitudeNormalizationCallback([
         [0, 1],
         [0, 2],
       ]),
-    ).toThrow();
-    expect(() => vectorMagnitudeNormalizationCallback([[1], [1, 2]])).toThrow();
-    expect(() => ratioNormalizationCallback([[1, Infinity]], [1, -1])).toThrow();
+    ).toThrow(new Error("Vector magnitude divisor must be finite and positive."));
+    expect(() => vectorMagnitudeNormalizationCallback([[1], [1, 2]])).toThrow(
+      new Error("Vector magnitude normalization requires a rectangular finite matrix."),
+    );
+    expect(() => ratioNormalizationCallback([[1, Infinity]], [1, -1])).toThrow(
+      new Error(
+        "Ratio normalization requires positive finite values and matching criterion types.",
+      ),
+    );
   });
 });

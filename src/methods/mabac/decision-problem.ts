@@ -20,7 +20,7 @@ export class MabacDecisionProblem extends AbstractNormalizedDecisionProblem {
       throw new Error("This MABAC implementation requires a normalization callback.");
     }
 
-    const normalizedMatrix = this.normalizationCallback(this.matrix, this.types);
+    const normalizedMatrix = this.normalizeMatrix(this.normalizationCallback);
     this.addToDebugBag("normalizedMatrix", normalizedMatrix);
 
     const weightedNormalizedMatrix = this.getWeightedNormalizedMatrix(normalizedMatrix);

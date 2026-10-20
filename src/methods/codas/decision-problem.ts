@@ -39,7 +39,7 @@ export class CodasDecisionProblem extends AbstractNormalizedDecisionProblem {
       throw new Error("This CODAS implementation requires a normalization callback.");
     }
 
-    const normalizedMatrix = this.normalizationCallback(this.matrix, this.types);
+    const normalizedMatrix = this.normalizeMatrix(this.normalizationCallback);
     this.validateNormalizedMatrix(normalizedMatrix);
     this.addToDebugBag("normalizedMatrix", normalizedMatrix);
 
@@ -83,6 +83,9 @@ export class CodasDecisionProblem extends AbstractNormalizedDecisionProblem {
     for (const alternativeValues of matrix) {
       if (alternativeValues.length !== this.weights.length) {
         throw new Error("CODAS normalized matrix rows must match the weights length.");
+      }
+      if (alternativeValues.some((value) => !Number.isFinite(value))) {
+        throw new Error("CODAS normalized matrix values must be finite.");
       }
     }
   }

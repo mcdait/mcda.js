@@ -58,7 +58,9 @@ describe("PrometheeDecisionProblem", () => {
 
     problem.preferenceFunctions = [usualPreference];
 
-    expect(() => problem.scores).toThrow("PROMETHEE requires one preference function per weight.");
+    expect(() => problem.scores).toThrow(
+      new Error("PROMETHEE requires one preference function per weight."),
+    );
   });
 
   test("requires preference functions to be callable", () => {
@@ -66,7 +68,9 @@ describe("PrometheeDecisionProblem", () => {
 
     problem.preferenceFunctions = [usualPreference, undefined as unknown as PreferenceFunction];
 
-    expect(() => problem.scores).toThrow("PROMETHEE preference functions must be callable.");
+    expect(() => problem.scores).toThrow(
+      new Error("PROMETHEE preference functions must be callable."),
+    );
   });
 
   test.each([Number.NaN, Number.POSITIVE_INFINITY, -0.1, 1.1])(
@@ -78,7 +82,7 @@ describe("PrometheeDecisionProblem", () => {
       problem.preferenceFunctions = [invalidPreference, usualPreference];
 
       expect(() => problem.scores).toThrow(
-        "PROMETHEE preference function must return a finite number between 0 and 1.",
+        new Error("PROMETHEE preference function must return a finite number between 0 and 1."),
       );
     },
   );

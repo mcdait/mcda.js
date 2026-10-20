@@ -67,21 +67,31 @@ describe("PvmDecisionProblem", () => {
       label: "empty matrix",
       matrix: [],
       weights: [0.4, 0.35, 0.25],
-      error: /at least one alternative/,
+      error: "Decision problem requires at least one alternative.",
     },
-    { label: "ragged row", matrix: [[1, 2]], weights: [0.4, 0.35, 0.25], error: /rows must match/ },
-    { label: "NaN value", matrix: [[NaN, 2, 3]], weights: [0.4, 0.35, 0.25], error: /finite/ },
+    {
+      label: "ragged row",
+      matrix: [[1, 2]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem matrix rows must match the weights length.",
+    },
+    {
+      label: "NaN value",
+      matrix: [[NaN, 2, 3]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Matrix row must contain 3 finite values.",
+    },
     {
       label: "negative weight",
       matrix: [[1, 2, 3]],
       weights: [-1, 1, 1],
-      error: /Weights must be non-negative/,
+      error: "Weights must be non-negative with a positive sum.",
     },
   ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
     problem.matrix = matrix.map((row) => [...row]);
     problem.weights = [...weights];
-    expect(() => problem.scores).toThrow(error);
+    expect(() => problem.scores).toThrow(new Error(error));
   });
   it("calculates scores using custom reference vectors", () => {
     const problem = createProblem(true);
@@ -123,9 +133,11 @@ describe("PvmDecisionProblem", () => {
   it("requires paired patterns and a nonzero direction", () => {
     const problem = createProblem();
     problem.psi = [1, 2, 3];
-    expect(() => problem.scores).toThrow(/together/);
+    expect(() => problem.scores).toThrow(new Error("PVM psi and phi must be provided together."));
     problem.phi = [1, 2, 3];
-    expect(() => problem.scores).toThrow(/divisor/);
+    expect(() => problem.scores).toThrow(
+      new Error("The method is undefined because a divisor is zero or non-finite."),
+    );
   });
 });
 

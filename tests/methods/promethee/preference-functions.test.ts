@@ -36,16 +36,16 @@ describe("PROMETHEE preference functions", () => {
 
   test("validates non-negative finite thresholds", () => {
     expect(() => uShapePreference(-1)).toThrow(
-      "PROMETHEE preference function threshold q must be a non-negative finite number.",
+      new Error("PROMETHEE preference function threshold q must be a non-negative finite number."),
     );
     expect(() => linearPreference(Number.POSITIVE_INFINITY, 1)).toThrow(
-      "PROMETHEE preference function threshold p must be a non-negative finite number.",
+      new Error("PROMETHEE preference function threshold p must be a non-negative finite number."),
     );
   });
 
   test("validates a positive v-shape preference threshold", () => {
     expect(() => vShapePreference(0)).toThrow(
-      "PROMETHEE preference function threshold p must be greater than 0.",
+      new Error("PROMETHEE preference function threshold p must be greater than 0."),
     );
   });
 
@@ -55,7 +55,7 @@ describe("PROMETHEE preference functions", () => {
     ["gaussian", () => gaussianPreference(1, 1)],
   ])("validates %s threshold order", (_, createPreferenceFunction) => {
     expect(createPreferenceFunction).toThrow(
-      "PROMETHEE preference function threshold p must be greater than q.",
+      new Error("PROMETHEE preference function threshold p must be greater than q."),
     );
   });
 });
