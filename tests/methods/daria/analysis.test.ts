@@ -17,6 +17,29 @@ const preferences = [
 ];
 
 describe("DariaAnalysis", () => {
+  it("stores custom debug fields only while enabled and resets them when re-enabled", () => {
+    const analysis = new DariaAnalysis();
+    analysis.matrix = [[1, 2]];
+    analysis.addToDebugBag("ignored", 1);
+    expect(analysis.debugBag).toBeUndefined();
+
+    analysis.enableDebug(true);
+    analysis.addToDebugBag("custom", "value");
+    const result = analysis.result;
+    expect(analysis.debugBag).toEqual({
+      custom: "value",
+      ...result,
+      latestScores: [1, 2],
+    });
+
+    analysis.enableDebug(true);
+    expect(analysis.debugBag).toEqual({});
+    analysis.enableDebug(false);
+    analysis.addToDebugBag("ignored", 2);
+    analysis.result;
+    expect(analysis.debugBag).toBeUndefined();
+  });
+
   it.each([
     [standardDeviationVariability, [0.2449, 0.1633, 0, 0.1633], [1.0449, -0.4367, 0.3, 0.3633]],
     [varianceVariability, [0.06, 0.0267, 0, 0.0267], [0.86, -0.5733, 0.3, 0.2267]],

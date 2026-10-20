@@ -7,6 +7,7 @@ export enum CriterionType {
  * A two-dimensional matrix of decision values.
  * The first index corresponds to the alternative (row),
  * and the second index corresponds to the criterion (column).
+ * In DARIA, rows represent periods and columns represent alternatives.
  */
 export type DecisionMatrix = number[][];
 export type DecisionMatrixObject = Record<string, Record<string, number>>;
@@ -50,4 +51,12 @@ export type NormalizationCallback = (
 export interface ConfigurableNormalizationInterface {
   get normalizationCallback(): NormalizationCallback | undefined;
   set normalizationCallback(callback: NormalizationCallback | undefined);
+}
+
+/** Rows are consecutive periods; columns are alternatives. */
+export type VariabilityCallback = (preferences: DecisionMatrix) => number[];
+/** Configure variability across periods; undefined selects the analysis default. */
+export interface ConfigurableVariabilityInterface {
+  get variabilityCallback(): VariabilityCallback | undefined;
+  set variabilityCallback(callback: VariabilityCallback | undefined);
 }

@@ -48,6 +48,31 @@ function verify(
   );
 }
 describe("VikorSmaaAnalysis", () => {
+  it("preserves custom debug fields and resets diagnostics when re-enabled", () => {
+    const analysis = createAnalysis();
+    analysis.addToDebugBag("note", "ignored");
+    expect(analysis.debugBag).toBeUndefined();
+    analysis.enableDebug(true);
+    analysis.addToDebugBag("note", "kept");
+    const result = analysis.result;
+    expect(analysis.debugBag).toMatchObject({ note: "kept", ...result });
+    expect(Object.keys(analysis.debugBag!).sort()).toEqual([
+      "centralWeightVectors",
+      "note",
+      "preferences",
+      "rankAcceptabilityIndex",
+      "rankScores",
+      "ranks",
+      "sampleRanks",
+    ]);
+    analysis.enableDebug(true);
+    expect(analysis.debugBag).toEqual({});
+    analysis.enableDebug(false);
+    analysis.addToDebugBag("note", "ignored");
+    analysis.result;
+    expect(analysis.debugBag).toBeUndefined();
+  });
+
   it("calculates rank acceptability and central weights for three alternatives", () => {
     const analysis = createAnalysis(false);
 

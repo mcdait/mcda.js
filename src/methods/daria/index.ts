@@ -6,10 +6,4 @@ export {
   entropyVariability,
   coefficientOfVariationVariability,
 } from "./variability-functions";
-export type {
-  VariabilityCallback,
-  DariaDirection,
-  DariaDirectionLabel,
-  DariaResult,
-  DariaDebugResults,
-} from "./types";
+export type { DariaDirection, DariaDirectionLabel, DariaResult, DariaDebugResults } from "./types";

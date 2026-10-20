@@ -1,7 +1,5 @@
-import type { DecisionMatrix, Scores } from "../../types";
+import type { Scores } from "../../types";
 
-/** Rows are consecutive periods; columns are alternatives. */
-export type VariabilityCallback = (preferences: DecisionMatrix) => number[];
 export type DariaDirection = -1 | 0 | 1;
 export type DariaDirectionLabel = "↑" | "↓" | "=";
 export type DariaResult = {

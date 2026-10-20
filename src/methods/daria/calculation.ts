@@ -1,12 +1,7 @@
 import { CriterionType } from "../../types";
-import type { DecisionMatrix } from "../../types";
+import type { DecisionMatrix, VariabilityCallback } from "../../types";
 import { finiteVector, validateMatrix } from "../shared/numeric";
-import type {
-  DariaDirection,
-  DariaDirectionLabel,
-  DariaResult,
-  VariabilityCallback,
-} from "./types";
+import type { DariaDirection, DariaDirectionLabel, DariaResult } from "./types";
 
 export function calculateDaria(
   matrix: DecisionMatrix,

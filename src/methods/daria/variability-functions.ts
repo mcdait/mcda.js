@@ -1,5 +1,5 @@
 import { columns, divide, sum, validateMatrix } from "../shared/numeric";
-import type { VariabilityCallback } from "./types";
+import type { VariabilityCallback } from "../../types";
 
 function preferenceColumns(matrix: number[][]): number[][] {
   validateMatrix(matrix, matrix.length, matrix[0]?.length ?? 0);

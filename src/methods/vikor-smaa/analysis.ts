@@ -1,4 +1,9 @@
-import type { CriterionType, DebugBag, DecisionMatrix } from "../../types";
+import { AbstractMatrixAnalysis } from "../../core";
+import type {
+  CriterionType,
+  CriteriaTypesInputInterface,
+  ConfigurableNormalizationInterface,
+} from "../../types";
 import type { NormalizationCallback } from "../../types/core";
 import { rank } from "../../utils/ranking";
 import {
@@ -13,19 +18,14 @@ import { calculateVikor } from "../vikor/calculation";
 import type { VikorSmaaResult } from "./types";
 
 /** Deterministic SMAA: callers supply the exact weight samples to analyze. */
-export class VikorSmaaAnalysis {
-  protected _matrix: DecisionMatrix = [];
+export class VikorSmaaAnalysis
+  extends AbstractMatrixAnalysis<VikorSmaaResult>
+  implements CriteriaTypesInputInterface, ConfigurableNormalizationInterface
+{
   protected _types: CriterionType[] = [];
   protected _weightSamples: number[][] = [];
   protected _v = 0.5;
   protected _normalizationCallback: NormalizationCallback | undefined;
-  protected _debugBag: DebugBag | undefined;
-  public get matrix(): DecisionMatrix {
-    return this._matrix;
-  }
-  public set matrix(value: DecisionMatrix) {
-    this._matrix = value;
-  }
   public get types(): CriterionType[] {
     return this._types;
   }
@@ -50,13 +50,6 @@ export class VikorSmaaAnalysis {
   public set normalizationCallback(value: NormalizationCallback | undefined) {
     this._normalizationCallback = value;
   }
-  public get debugBag(): DebugBag | undefined {
-    return this._debugBag;
-  }
-  public enableDebug(enabled: boolean): void {
-    this._debugBag = enabled ? {} : undefined;
-  }
-
   public get result(): VikorSmaaResult {
     if (!this.weightSamples.length)
       throw new Error("VIKOR-SMAA requires at least one weight sample.");
@@ -94,8 +87,12 @@ export class VikorSmaaAnalysis {
       rankScores[i] /= count;
     }
     const result = { rankAcceptabilityIndex, centralWeightVectors, ranks: rank(rankScores) };
-    if (this._debugBag)
-      Object.assign(this._debugBag, result, { preferences, sampleRanks, rankScores });
+    this.addToDebugBag("rankAcceptabilityIndex", rankAcceptabilityIndex);
+    this.addToDebugBag("centralWeightVectors", centralWeightVectors);
+    this.addToDebugBag("ranks", result.ranks);
+    this.addToDebugBag("preferences", preferences);
+    this.addToDebugBag("sampleRanks", sampleRanks);
+    this.addToDebugBag("rankScores", rankScores);
     return result;
   }
 }

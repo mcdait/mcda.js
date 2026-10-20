@@ -1,22 +1,18 @@
 import { CriterionType } from "../../types";
-import type { DebugBag, DecisionMatrix, Scores } from "../../types";
+import type { Scores, VariabilityCallback, ConfigurableVariabilityInterface } from "../../types";
+import { AbstractMatrixAnalysis } from "../../core";
 import { calculateDaria } from "./calculation";
-import type { DariaResult, VariabilityCallback } from "./types";
+import type { DariaResult } from "./types";
 import { standardDeviationVariability } from "./variability-functions";
 
 /** Analyze existing MCDA scores: periods in rows, alternatives in columns. */
-export class DariaAnalysis {
-  protected _matrix: DecisionMatrix = [];
+export class DariaAnalysis
+  extends AbstractMatrixAnalysis<DariaResult>
+  implements ConfigurableVariabilityInterface
+{
   protected _preferenceType = CriterionType.BENEFIT;
   protected _variabilityCallback: VariabilityCallback | undefined;
-  protected _debugBag: DebugBag | undefined;
 
-  public get matrix(): DecisionMatrix {
-    return this._matrix;
-  }
-  public set matrix(value: DecisionMatrix) {
-    this._matrix = value;
-  }
   public get preferenceType(): CriterionType {
     return this._preferenceType;
   }
@@ -29,12 +25,6 @@ export class DariaAnalysis {
   public set variabilityCallback(value: VariabilityCallback | undefined) {
     this._variabilityCallback = value;
   }
-  public get debugBag(): DebugBag | undefined {
-    return this._debugBag;
-  }
-  public enableDebug(enabled: boolean): void {
-    this._debugBag = enabled ? {} : undefined;
-  }
   public get scores(): Scores {
     return this.result.scores;
   }
@@ -45,10 +35,13 @@ export class DariaAnalysis {
       this.variabilityCallback ?? standardDeviationVariability,
       this.preferenceType,
     );
-    if (this._debugBag)
-      Object.assign(this._debugBag, result, {
-        latestScores: [...this.matrix[this.matrix.length - 1]],
-      });
+    this.addToDebugBag("scores", result.scores);
+    this.addToDebugBag("variability", result.variability);
+    this.addToDebugBag("direction", result.direction);
+    this.addToDebugBag("directionLabels", result.directionLabels);
+    if (this._debugBag !== undefined) {
+      this.addToDebugBag("latestScores", [...this.matrix[this.matrix.length - 1]]);
+    }
     return result;
   }
 }

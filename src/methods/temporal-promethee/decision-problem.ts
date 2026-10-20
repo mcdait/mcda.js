@@ -1,9 +1,14 @@
 import { AbstractBaseDecisionProblem } from "../../core";
 import { CriterionType } from "../../types";
-import type { DecisionMatrix, Scores, CriteriaTypesInputInterface } from "../../types";
+import type {
+  DecisionMatrix,
+  Scores,
+  CriteriaTypesInputInterface,
+  VariabilityCallback,
+  ConfigurableVariabilityInterface,
+} from "../../types";
 import { calculateDaria } from "../daria/calculation";
 import { standardDeviationVariability } from "../daria/variability-functions";
-import type { VariabilityCallback } from "../daria/types";
 import { PrometheeDecisionProblem } from "../promethee/decision-problem";
 import { usualPreference } from "../promethee/preference-functions";
 import type {
@@ -15,7 +20,10 @@ import type { TemporalPrometheeResult } from "./types";
 
 export class TemporalPrometheeDecisionProblem
   extends AbstractBaseDecisionProblem
-  implements CriteriaTypesInputInterface, ConfigurablePreferenceFunctionsInterface
+  implements
+    CriteriaTypesInputInterface,
+    ConfigurablePreferenceFunctionsInterface,
+    ConfigurableVariabilityInterface
 {
   protected _matrices: DecisionMatrix[] = [];
   protected _types: CriterionType[] = [];
