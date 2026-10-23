@@ -1,8 +1,8 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CocosoDecisionProblem, CriterionType, minMaxNormalizationCallback } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): CocosoDecisionProblem {
   const problem = new CocosoDecisionProblem();
   problem.matrix = second
@@ -27,10 +27,10 @@ function createProblem(second = false): CocosoDecisionProblem {
 
 describe("CocosoDecisionProblem", () => {
   it("calculates scores for three alternatives", () => {
-    expect(rounded(createProblem().scores)).toEqual([2.6677, 2.6658, 1.4854]);
+    expect(round4(createProblem().scores)).toEqual([2.6677, 2.6658, 1.4854]);
   });
   it("calculates scores with four criteria and unequal weights", () => {
-    expect(rounded(createProblem(true).scores)).toEqual([2.6162, 2.0877, 2.9233, 1.4068]);
+    expect(round4(createProblem(true).scores)).toEqual([2.6162, 2.0877, 2.9233, 1.4068]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
     const problem = createProblem();
@@ -55,46 +55,79 @@ describe("CocosoDecisionProblem", () => {
     problem.scores;
     expect(problem.debugBag).toBeUndefined();
   });
-  it("rejects malformed matrices, non-finite data and invalid weights", () => {
+  it.each([
+    {
+      label: "empty matrix",
+      matrix: [],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem requires at least one alternative.",
+    },
+    {
+      label: "ragged row",
+      matrix: [[1, 2]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem matrix rows must match the weights length.",
+    },
+    {
+      label: "NaN value",
+      matrix: [[NaN, 2, 3]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Matrix row must contain 3 finite values.",
+    },
+    {
+      label: "negative weight",
+      matrix: [[1, 2, 3]],
+      weights: [-1, 1, 1],
+      error: "Weights must be non-negative with a positive sum.",
+    },
+  ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
-    problem.matrix = [];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[NaN, 2, 3]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2, 3]];
-    problem.weights = [-1, 1, 1];
-    expect(() => problem.scores).toThrow();
+    problem.matrix = matrix.map((row) => [...row]);
+    problem.weights = [...weights];
+    expect(() => problem.scores).toThrow(new Error(error));
   });
-  it("requires a callback and rejects malformed callback results", () => {
+  it("requires a normalization callback", () => {
     const problem = createProblem();
     problem.normalizationCallback = undefined;
-    expect(() => problem.scores).toThrow(/normalization callback/);
-    problem.normalizationCallback = () => [[1]];
-    expect(() => problem.scores).toThrow();
-    problem.normalizationCallback = (matrix) => matrix.map((row) => row.map(() => Infinity));
-    expect(() => problem.scores).toThrow();
+    expect(() => problem.scores).toThrow(
+      new Error("This method requires a normalization callback."),
+    );
+  });
+  it.each([
+    {
+      label: "missing rows",
+      callback: () => [[1]],
+      error: "Matrix must have non-empty, matching dimensions.",
+    },
+    {
+      label: "non-finite values",
+      callback: (matrix: number[][]) => matrix.map((row) => row.map(() => Infinity)),
+      error: "Matrix row must contain 3 finite values.",
+    },
+  ])("rejects normalization with $label", ({ callback, error }) => {
+    const problem = createProblem();
+    problem.normalizationCallback = callback;
+    expect(() => problem.scores).toThrow(new Error(error));
   });
   it("calculates scores with lambda set to zero", () => {
     const problem = createProblem();
     problem.lambda = 0;
-    expect(rounded(problem.scores)).toEqual([2.7068, 2.6471, 1.4498]);
+    expect(round4(problem.scores)).toEqual([2.7068, 2.6471, 1.4498]);
   });
   it("calculates scores with lambda set to 0.25", () => {
     const problem = createProblem();
     problem.lambda = 0.25;
-    expect(rounded(problem.scores)).toEqual([2.6918, 2.6544, 1.4638]);
+    expect(round4(problem.scores)).toEqual([2.6918, 2.6544, 1.4638]);
   });
   it("calculates scores with lambda set to one", () => {
     const problem = createProblem();
     problem.lambda = 1;
-    expect(rounded(problem.scores)).toEqual([2.511, 2.7352, 1.6108]);
+    expect(round4(problem.scores)).toEqual([2.511, 2.7352, 1.6108]);
   });
   it.each([-0.1, 1.1, NaN, Infinity])("rejects lambda=%s", (value) => {
     const problem = createProblem();
     problem.lambda = value;
-    expect(() => problem.scores).toThrow(/lambda/);
+    expect(() => problem.scores).toThrow(new Error("COCOSO lambda must be between 0 and 1."));
   });
 });
 

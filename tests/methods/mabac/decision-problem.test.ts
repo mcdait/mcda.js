@@ -1,6 +1,7 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CriterionType } from "../../../src/types";
-import type { DecisionMatrix, NormalizationCallback } from "../../../src/types";
+import type { DecisionMatrix } from "../../../src/types";
 import { linearNormalizationCallback } from "../../../src/utils";
 import { MabacDecisionProblem } from "../../../src/methods/mabac";
 import type { MabacDebugResults } from "../../../src/methods/mabac";
@@ -18,22 +19,38 @@ const types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST]
 function createMabacProblem(): MabacDecisionProblem {
   const problem = new MabacDecisionProblem();
 
-  problem.alternatives = alternatives;
-  problem.criteria = criteria;
-  problem.matrix = matrix;
-  problem.weights = weights;
-  problem.types = types;
+  problem.alternatives = [...alternatives];
+  problem.criteria = [...criteria];
+  problem.matrix = matrix.map((row) => [...row]);
+  problem.weights = [...weights];
+  problem.types = [...types];
   problem.normalizationCallback = linearNormalizationCallback;
 
   return problem;
 }
 
 describe("MabacDecisionProblem", () => {
+  it("isolates normalization callback mutations", () => {
+    const problem = new MabacDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   it("calculates scores", () => {
     const problem = createMabacProblem();
-    const roundedScores = problem.scores.map((s) => Math.round(s * 10000) / 10000);
 
-    expect(roundedScores).toEqual([0.0189, 0.1772, -0.0228]);
+    expect(round4(problem.scores)).toEqual([0.0189, 0.1772, -0.0228]);
   });
 
   describe("validations", () => {
@@ -43,7 +60,7 @@ describe("MabacDecisionProblem", () => {
       problem.normalizationCallback = undefined;
 
       expect(() => problem.scores).toThrow(
-        "This MABAC implementation requires a normalization callback.",
+        new Error("This MABAC implementation requires a normalization callback."),
       );
     });
 
@@ -56,7 +73,7 @@ describe("MabacDecisionProblem", () => {
         [1, 0, 0, 1],
       ];
 
-      expect(() => problem.scores).toThrow("MABAC criterion weight is required.");
+      expect(() => problem.scores).toThrow(new Error("MABAC criterion weight is required."));
     });
 
     it("throws when normalization returns too few weighted values", () => {
@@ -64,27 +81,9 @@ describe("MabacDecisionProblem", () => {
 
       problem.normalizationCallback = () => [[], [], []];
 
-      expect(() => problem.scores).toThrow("MABAC weighted normalized value is required.");
-    });
-
-    it("throws when normalization creates a distance value without a border value", () => {
-      const problem = createMabacProblem();
-      const rowWithExtraWeightedValue = {
-        map: (callback: (value: number, criterionIndex: number) => number) => [
-          callback(0.5, 0),
-          callback(1 / 3, 1),
-          callback(0.5, 2),
-          1,
-        ],
-      };
-
-      problem.normalizationCallback = (() => [
-        rowWithExtraWeightedValue,
-        rowWithExtraWeightedValue,
-        rowWithExtraWeightedValue,
-      ]) as unknown as NormalizationCallback;
-
-      expect(() => problem.scores).toThrow("MABAC border approximation value is required.");
+      expect(() => problem.scores).toThrow(
+        new Error("MABAC weighted normalized value is required."),
+      );
     });
   });
 

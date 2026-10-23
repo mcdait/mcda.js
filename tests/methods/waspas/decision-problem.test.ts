@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { WaspasDecisionProblem } from "../../../src/methods/waspas";
 import type { WaspasDebugResults } from "../../../src/methods/waspas";
@@ -25,16 +26,32 @@ function createWaspasProblem(): WaspasDecisionProblem {
 }
 
 describe("WaspasDecisionProblem", () => {
+  it("isolates normalization callback mutations", () => {
+    const problem = new WaspasDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   it("calculates appraisal scores and ranks alternatives", () => {
     const problem = createWaspasProblem();
     const scores = problem.scores;
-    const roundedScores = scores.map((score) => Math.round(score * 10000) / 10000);
     const rankedAlternatives = problem.alternatives
       .map((alternative, index) => ({ alternative, score: scores[index] ?? 0 }))
       .sort((left, right) => right.score - left.score)
       .map(({ alternative }) => alternative);
 
-    expect(roundedScores).toEqual([0.8354, 0.9077, 0.8048]);
+    expect(round4(scores)).toEqual([0.8354, 0.9077, 0.8048]);
     expect(rankedAlternatives).toEqual(["Laptop B", "Laptop A", "Laptop C"]);
   });
 
@@ -43,9 +60,11 @@ describe("WaspasDecisionProblem", () => {
     problem.enableDebug(true);
 
     problem.lambda = 1;
+    expect(round4(problem.scores)).toEqual([0.8361, 0.9111, 0.8119]);
     expect(problem.scores).toEqual((problem.debugBag as WaspasDebugResults).weightedSumScores);
 
     problem.lambda = 0;
+    expect(round4(problem.scores)).toEqual([0.8347, 0.9044, 0.7977]);
     expect(problem.scores).toEqual((problem.debugBag as WaspasDebugResults).weightedProductScores);
   });
 
@@ -55,7 +74,7 @@ describe("WaspasDecisionProblem", () => {
       problem.normalizationCallback = undefined;
 
       expect(() => problem.scores).toThrow(
-        "This WASPAS implementation requires a normalization callback.",
+        new Error("This WASPAS implementation requires a normalization callback."),
       );
     });
 
@@ -63,7 +82,9 @@ describe("WaspasDecisionProblem", () => {
       const problem = createWaspasProblem();
       problem.lambda = 1.01;
 
-      expect(() => problem.scores).toThrow("WASPAS parameter lambda must be between 0 and 1.");
+      expect(() => problem.scores).toThrow(
+        new Error("WASPAS parameter lambda must be between 0 and 1."),
+      );
     });
 
     it("requires the normalized matrix to preserve its dimensions", () => {
@@ -71,7 +92,7 @@ describe("WaspasDecisionProblem", () => {
       problem.normalizationCallback = () => [[1, 1, 1]];
 
       expect(() => problem.scores).toThrow(
-        "WASPAS normalized matrix must contain one row per alternative.",
+        new Error("WASPAS normalized matrix must contain one row per alternative."),
       );
     });
 
@@ -84,7 +105,7 @@ describe("WaspasDecisionProblem", () => {
       ];
 
       expect(() => problem.scores).toThrow(
-        "WASPAS normalized matrix values must be non-negative and finite.",
+        new Error("WASPAS normalized matrix values must be non-negative and finite."),
       );
     });
   });

@@ -22,6 +22,8 @@ export * from "./methods/prosa-c";
 export * from "./methods/vmcm";
 export * from "./methods/pvm";
 export * from "./methods/vikor-smaa";
+export * from "./methods/daria";
+export * from "./methods/temporal-promethee";
 
 // Common types
 export * from "./types";

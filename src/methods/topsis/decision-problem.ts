@@ -1,6 +1,6 @@
-import { CriterionType } from "../../types";
 import type { DecisionMatrix, Scores } from "../../types";
 import { AbstractNormalizedDecisionProblem } from "../../core";
+import { validateMatrix } from "../shared/numeric";
 
 export class TopsisDecisionProblem extends AbstractNormalizedDecisionProblem {
   public get scores(): Scores {
@@ -13,7 +13,8 @@ export class TopsisDecisionProblem extends AbstractNormalizedDecisionProblem {
       throw new Error("TOPSIS requires a normalization callback.");
     }
 
-    const normalizedMatrix = this.normalizationCallback(this.matrix, this.types);
+    const normalizedMatrix = this.normalizeMatrix(this.normalizationCallback);
+    validateMatrix(normalizedMatrix, this.matrix.length, this.weights.length);
     this.addToDebugBag("normalizedMatrix", normalizedMatrix);
     const weightedNormalizedMatrix = this.applyWeights(normalizedMatrix);
     this.addToDebugBag("weightedNormalizedMatrix", weightedNormalizedMatrix);

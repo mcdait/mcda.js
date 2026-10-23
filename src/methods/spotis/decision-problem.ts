@@ -46,6 +46,21 @@ export class SpotisDecisionProblem extends AbstractDecisionProblem {
         `The number of bounds (${this.bounds.length}) must match the number of criteria (${this.weights.length}).`,
       );
     }
+
+    for (const bounds of this.bounds) {
+      const [lower, upper] = bounds;
+      if (
+        bounds.length !== 2 ||
+        !Number.isFinite(lower) ||
+        !Number.isFinite(upper) ||
+        lower >= upper ||
+        !Number.isFinite(upper - lower)
+      ) {
+        throw new Error(
+          "SPOTIS bounds must be finite [lower, upper] pairs with a positive finite range.",
+        );
+      }
+    }
   }
 
   private spotis(): Scores {

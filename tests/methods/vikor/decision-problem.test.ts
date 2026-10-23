@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CriterionType } from "../../../src/types";
 import type { DecisionMatrix } from "../../../src/types";
@@ -17,22 +18,38 @@ const types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST]
 function createVikorProblem(): VikorDecisionProblem {
   const problem = new VikorDecisionProblem();
 
-  problem.alternatives = alternatives;
-  problem.criteria = criteria;
-  problem.matrix = matrix;
-  problem.weights = weights;
-  problem.types = types;
+  problem.alternatives = [...alternatives];
+  problem.criteria = [...criteria];
+  problem.matrix = matrix.map((row) => [...row]);
+  problem.weights = [...weights];
+  problem.types = [...types];
   problem.normalizationCallback = vectorNormalizationCallback;
 
   return problem;
 }
 
 describe("VikorDecisionProblem", () => {
+  it("isolates normalization callback mutations", () => {
+    const problem = new VikorDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   it("calculates scores", () => {
     const problem = createVikorProblem();
 
-    const roundedScores = problem.scores.map((s) => Math.round(s * 10000) / 10000);
-    expect(roundedScores).toEqual([0.3958, 0.5, 0.85]);
+    expect(round4(problem.scores)).toEqual([0.3958, 0.5, 0.85]);
   });
 
   describe("validations", () => {
@@ -42,7 +59,7 @@ describe("VikorDecisionProblem", () => {
       problem.normalizationCallback = undefined;
 
       expect(() => problem.scores).toThrow(
-        "This VIKOR implementation requires a normalization callback.",
+        new Error("This VIKOR implementation requires a normalization callback."),
       );
     });
 
@@ -51,7 +68,7 @@ describe("VikorDecisionProblem", () => {
 
       problem.v = -0.1;
 
-      expect(() => problem.scores).toThrow("VIKOR parameter v must be between 0 and 1.");
+      expect(() => problem.scores).toThrow(new Error("VIKOR parameter v must be between 0 and 1."));
     });
 
     it("throws when v > 1", () => {
@@ -59,7 +76,7 @@ describe("VikorDecisionProblem", () => {
 
       problem.v = 1.1;
 
-      expect(() => problem.scores).toThrow("VIKOR parameter v must be between 0 and 1.");
+      expect(() => problem.scores).toThrow(new Error("VIKOR parameter v must be between 0 and 1."));
     });
 
     it("accepts when v = 0", () => {
@@ -67,7 +84,7 @@ describe("VikorDecisionProblem", () => {
 
       problem.v = 0;
 
-      expect(() => problem.scores).not.toThrow();
+      expect(round4(problem.scores)).toEqual([0, 1, 0.7]);
     });
 
     it("accepts when v = 1", () => {
@@ -75,7 +92,7 @@ describe("VikorDecisionProblem", () => {
 
       problem.v = 1;
 
-      expect(() => problem.scores).not.toThrow();
+      expect(round4(problem.scores)).toEqual([0.7917, 0, 1]);
     });
   });
 

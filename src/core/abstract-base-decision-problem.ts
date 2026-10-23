@@ -1,24 +1,19 @@
+import { AbstractDebuggable } from "./abstract-debuggable";
 import type {
   AlternativesInputInterface,
   CriteriaInputInterface,
   WeightsInputInterface,
-  DebuggableInterface,
-  DebugBag,
   Scores,
 } from "../types";
 
 /** Shared state and diagnostics, independent of the decision matrix format. */
 export abstract class AbstractBaseDecisionProblem
-  implements
-    AlternativesInputInterface,
-    CriteriaInputInterface,
-    WeightsInputInterface,
-    DebuggableInterface
+  extends AbstractDebuggable
+  implements AlternativesInputInterface, CriteriaInputInterface, WeightsInputInterface
 {
   protected _weights: number[] = [];
   protected _alternatives: string[] = [];
   protected _criteria: string[] = [];
-  protected _debugBag: DebugBag | undefined;
 
   public get alternatives(): string[] {
     return this._alternatives;
@@ -44,14 +39,6 @@ export abstract class AbstractBaseDecisionProblem
     this._weights = weights;
   }
 
-  public get debugBag(): DebugBag | undefined {
-    return this._debugBag;
-  }
-
-  public enableDebug(enableDebug: boolean): void {
-    this._debugBag = enableDebug ? {} : undefined;
-  }
-
   public abstract get scores(): Scores;
 
   protected abstract validate(): void;
@@ -71,14 +58,6 @@ export abstract class AbstractBaseDecisionProblem
       if (name.trim().length === 0) {
         throw new Error(`Decision problem ${fieldName} names cannot be empty.`);
       }
-    }
-  }
-
-  public addToDebugBag(field: string, value: unknown): void {
-    const debugBag = this.debugBag;
-
-    if (debugBag !== undefined) {
-      debugBag[field] = value;
     }
   }
 }

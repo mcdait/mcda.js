@@ -1,9 +1,15 @@
 import { AbstractDecisionProblem } from "../../core";
 import type { Scores } from "../../types";
-import type { PreferenceFunction } from "../promethee/types";
+import type {
+  ConfigurablePreferenceFunctionsInterface,
+  PreferenceFunction,
+} from "../promethee/types";
 import { finiteVector, sum, validateData } from "../shared/numeric";
 
-export class ProsaCDecisionProblem extends AbstractDecisionProblem {
+export class ProsaCDecisionProblem
+  extends AbstractDecisionProblem
+  implements ConfigurablePreferenceFunctionsInterface
+{
   protected _preferenceFunctions: PreferenceFunction[] = [];
   protected _s: number[] | undefined;
   public get preferenceFunctions(): PreferenceFunction[] {

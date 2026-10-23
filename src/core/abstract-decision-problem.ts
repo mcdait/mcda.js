@@ -32,6 +32,12 @@ export abstract class AbstractDecisionProblem
   }
 
   public get matrixObj(): DecisionMatrixObject {
+    if (new Set(this.alternatives).size !== this.alternatives.length) {
+      throw new Error("Matrix object alternative names must be unique.");
+    }
+    if (new Set(this.criteria).size !== this.criteria.length) {
+      throw new Error("Matrix object criterion names must be unique.");
+    }
     return Object.fromEntries(
       this.alternatives.map((alternative, alternativeIndex) => [
         alternative,

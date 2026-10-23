@@ -253,7 +253,7 @@ export function sumNormalizationCallback(
   return normalizedMatrix;
 }
 
-/** pyrepo_mcda linear normalization: benefit x/max, cost min/x. */
+/** Ratio normalization: benefit x/max, cost min/x. */
 export function ratioNormalizationCallback(
   matrix: DecisionMatrix,
   types: CriterionType[],

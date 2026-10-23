@@ -18,6 +18,37 @@ class TestDecisionProblem extends AbstractDecisionProblem {
 }
 
 describe("AbstractDecisionProblem", () => {
+  test("matrixObj rejects duplicate alternative names instead of losing a row", () => {
+    const problem = new TestDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.alternatives = ["A", "A"];
+    problem.criteria = ["C"];
+    expect(() => problem.matrixObj).toThrow(
+      new Error("Matrix object alternative names must be unique."),
+    );
+  });
+
+  test("matrixObj rejects duplicate criterion names instead of losing a column", () => {
+    const problem = new TestDecisionProblem();
+    problem.matrix = [[1, 2]];
+    problem.alternatives = ["A"];
+    problem.criteria = ["C", "C"];
+    expect(() => problem.matrixObj).toThrow(
+      new Error("Matrix object criterion names must be unique."),
+    );
+  });
+
+  test("matches criterion keys when subsequent objects use another property order", () => {
+    const problem = new TestDecisionProblem();
+    problem.matrixObj = { A: { quality: 1, cost: 2 }, B: { cost: 4, quality: 3 } };
+    expect(problem.criteria).toEqual(["quality", "cost"]);
+    expect(problem.matrix).toEqual([
+      [1, 2],
+      [3, 4],
+    ]);
+    expect(problem.matrixObj).toEqual({ A: { quality: 1, cost: 2 }, B: { quality: 3, cost: 4 } });
+  });
+
   test("stores data assigned through regular setters", () => {
     const problem = new TestDecisionProblem();
 
@@ -72,7 +103,7 @@ describe("AbstractDecisionProblem", () => {
 
     expect(() => {
       problem.matrixObj = {};
-    }).toThrow("Decision problem matrix object requires at least one criterion.");
+    }).toThrow(new Error("Decision problem matrix object requires at least one criterion."));
   });
 
   test("throws when matrix object alternative has no criteria", () => {
@@ -82,7 +113,7 @@ describe("AbstractDecisionProblem", () => {
       problem.matrixObj = {
         a1: {},
       };
-    }).toThrow("Decision problem matrix object requires at least one criterion.");
+    }).toThrow(new Error("Decision problem matrix object requires at least one criterion."));
   });
 
   test("throws when matrix object alternatives have different criteria counts", () => {
@@ -93,7 +124,9 @@ describe("AbstractDecisionProblem", () => {
         a1: { c1: 8, c2: 7, c3: 1200 },
         a2: { c1: 7, c2: 9 },
       };
-    }).toThrow("Decision problem matrix object alternatives must contain the same criteria.");
+    }).toThrow(
+      new Error("Decision problem matrix object alternatives must contain the same criteria."),
+    );
   });
 
   test("throws when matrix object alternatives have different criteria", () => {
@@ -104,7 +137,9 @@ describe("AbstractDecisionProblem", () => {
         a1: { c1: 8, c2: 7, c3: 1200 },
         a2: { c1: 7, c2: 9, c4: 1000 },
       };
-    }).toThrow("Decision problem matrix object alternatives must contain the same criteria.");
+    }).toThrow(
+      new Error("Decision problem matrix object alternatives must contain the same criteria."),
+    );
   });
 
   test("throws when weights are empty", () => {
@@ -114,7 +149,9 @@ describe("AbstractDecisionProblem", () => {
     problem.weights = [];
     problem.types = [];
 
-    expect(() => problem.scores).toThrow("Decision problem requires at least one criterion.");
+    expect(() => problem.scores).toThrow(
+      new Error("Decision problem requires at least one criterion."),
+    );
   });
 
   test("throws when criterion types do not match weights length", () => {
@@ -125,7 +162,7 @@ describe("AbstractDecisionProblem", () => {
     problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT];
 
     expect(() => problem.scores).toThrow(
-      "Decision problem requires one criterion type per weight.",
+      new Error("Decision problem requires one criterion type per weight."),
     );
   });
 
@@ -136,7 +173,9 @@ describe("AbstractDecisionProblem", () => {
     problem.weights = [0.4, 0.35, 0.25];
     problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
 
-    expect(() => problem.scores).toThrow("Decision problem requires at least one alternative.");
+    expect(() => problem.scores).toThrow(
+      new Error("Decision problem requires at least one alternative."),
+    );
   });
 
   test("throws when matrix rows do not match weights length", () => {
@@ -147,7 +186,7 @@ describe("AbstractDecisionProblem", () => {
     problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
 
     expect(() => problem.scores).toThrow(
-      "Decision problem matrix rows must match the weights length.",
+      new Error("Decision problem matrix rows must match the weights length."),
     );
   });
 
@@ -160,7 +199,9 @@ describe("AbstractDecisionProblem", () => {
     problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
 
     expect(() => problem.scores).toThrow(
-      "Decision problem requires one alternative name per alternative when alternative names are provided.",
+      new Error(
+        "Decision problem requires one alternative name per alternative when alternative names are provided.",
+      ),
     );
   });
 
@@ -173,7 +214,9 @@ describe("AbstractDecisionProblem", () => {
     problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
 
     expect(() => problem.scores).toThrow(
-      "Decision problem requires one criterion name per criterion when criterion names are provided.",
+      new Error(
+        "Decision problem requires one criterion name per criterion when criterion names are provided.",
+      ),
     );
   });
 
@@ -185,7 +228,9 @@ describe("AbstractDecisionProblem", () => {
     problem.weights = [0.4, 0.35, 0.25];
     problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
 
-    expect(() => problem.scores).toThrow("Decision problem alternative names cannot be empty.");
+    expect(() => problem.scores).toThrow(
+      new Error("Decision problem alternative names cannot be empty."),
+    );
   });
 
   test("throws when criterion names are empty", () => {
@@ -196,7 +241,9 @@ describe("AbstractDecisionProblem", () => {
     problem.weights = [0.4, 0.35, 0.25];
     problem.types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST];
 
-    expect(() => problem.scores).toThrow("Decision problem criterion names cannot be empty.");
+    expect(() => problem.scores).toThrow(
+      new Error("Decision problem criterion names cannot be empty."),
+    );
   });
 
   test("adds values to debug bag only when debug is enabled", () => {

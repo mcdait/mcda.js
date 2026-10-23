@@ -46,7 +46,7 @@ src/
 ```
 
 - Implement the method in `decision-problem.ts`.
-- The decision problem class should extend `AbstractDecisionProblem` (directly or indirectly).
+- Choose a base class that matches the input and output contracts, as described below.
 - Any method-specific types should be placed in `types.ts` within the same directory.
 - Export the public API through `index.ts`.
 
@@ -70,6 +70,21 @@ examples/
 └── showcase/
     └── <method>.ts
 ```
+
+## Choosing a base class and interfaces
+
+Base classes provide reusable implementation. Interfaces describe capabilities and let
+unrelated classes expose the same contract; `implements` does not create fields or methods.
+
+| Requirement                                                | Base class                          | Existing example        |
+| ---------------------------------------------------------- | ----------------------------------- | ----------------------- |
+| Decision matrix, weights, benefit/cost types and scores    | `AbstractDecisionProblem`           | SPOTIS                  |
+| The same inputs with configurable normalization            | `AbstractNormalizedDecisionProblem` | TOPSIS                  |
+| Names, weights and scores with a different input structure | `AbstractBaseDecisionProblem`       | AHP, Temporal PROMETHEE |
+| A two-dimensional matrix and an analysis-specific result   | `AbstractMatrixAnalysis<TResult>`   | DARIA, VIKOR-SMAA       |
+
+`AbstractDebuggable` shares diagnostic storage between the bases above. Most methods do
+not need to select it directly.
 
 ## Documentation
 

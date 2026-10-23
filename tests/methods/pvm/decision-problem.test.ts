@@ -1,8 +1,8 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CriterionType, PvmCriterionType, PvmDecisionProblem } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): PvmDecisionProblem {
   const problem = new PvmDecisionProblem();
   problem.matrix = second
@@ -34,10 +34,10 @@ function createProblem(second = false): PvmDecisionProblem {
 
 describe("PvmDecisionProblem", () => {
   it("calculates scores for three alternatives", () => {
-    expect(rounded(createProblem().scores)).toEqual([-0.0126, 0.0061, -0.0222]);
+    expect(round4(createProblem().scores)).toEqual([-0.0126, 0.0061, -0.0222]);
   });
   it("calculates scores with four criteria and unequal weights", () => {
-    expect(rounded(createProblem(true).scores)).toEqual([-0.0116, 0.026, 0.0048, 0.0411]);
+    expect(round4(createProblem(true).scores)).toEqual([-0.0116, 0.026, 0.0048, 0.0411]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
     const problem = createProblem();
@@ -62,43 +62,62 @@ describe("PvmDecisionProblem", () => {
     problem.scores;
     expect(problem.debugBag).toBeUndefined();
   });
-  it("rejects malformed matrices, non-finite data and invalid weights", () => {
+  it.each([
+    {
+      label: "empty matrix",
+      matrix: [],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem requires at least one alternative.",
+    },
+    {
+      label: "ragged row",
+      matrix: [[1, 2]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem matrix rows must match the weights length.",
+    },
+    {
+      label: "NaN value",
+      matrix: [[NaN, 2, 3]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Matrix row must contain 3 finite values.",
+    },
+    {
+      label: "negative weight",
+      matrix: [[1, 2, 3]],
+      weights: [-1, 1, 1],
+      error: "Weights must be non-negative with a positive sum.",
+    },
+  ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
-    problem.matrix = [];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[NaN, 2, 3]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2, 3]];
-    problem.weights = [-1, 1, 1];
-    expect(() => problem.scores).toThrow();
+    problem.matrix = matrix.map((row) => [...row]);
+    problem.weights = [...weights];
+    expect(() => problem.scores).toThrow(new Error(error));
   });
   it("calculates scores using custom reference vectors", () => {
     const problem = createProblem(true);
     problem.psi = [10, 4, 170, 6];
     problem.phi = [3, 10, 250, 2];
-    expect(rounded(problem.scores)).toEqual([0.0235, 0.0553, 0.0339, 0.0619]);
+    expect(round4(problem.scores)).toEqual([0.0235, 0.0553, 0.0339, 0.0619]);
   });
   it("calculates scores when all criteria are stimulants", () => {
     const problem = createProblem(true);
     problem.pvmTypes = Array(4).fill(PvmCriterionType.STIMULANT);
-    expect(rounded(problem.scores)).toEqual([0.0061, 0.0604, 0.0365, 0.0651]);
+    expect(round4(problem.scores)).toEqual([0.0061, 0.0604, 0.0365, 0.0651]);
   });
   it("calculates scores when all criteria are destimulants", () => {
     const problem = createProblem(true);
     problem.pvmTypes = Array(4).fill(PvmCriterionType.DESTIMULANT);
-    expect(rounded(problem.scores)).toEqual([0.0811, 0.0268, 0.0507, 0.022]);
+    expect(round4(problem.scores)).toEqual([0.0811, 0.0268, 0.0507, 0.022]);
   });
   it("calculates scores when all criteria use desired values", () => {
     const problem = createProblem(true);
     problem.pvmTypes = Array(4).fill(PvmCriterionType.DESIRED);
-    expect(rounded(problem.scores)).toEqual([-0.1401, -0.0862, -0.0911, -0.0861]);
+    expect(round4(problem.scores)).toEqual([-0.1401, -0.0862, -0.0911, -0.0861]);
   });
   it("calculates scores when all criteria use undesired values", () => {
     const problem = createProblem(true);
     problem.pvmTypes = Array(4).fill(PvmCriterionType.UNDESIRED);
-    expect(rounded(problem.scores)).toEqual([0.0874, 0.119, 0.0851, 0.1323]);
+    expect(round4(problem.scores)).toEqual([0.0874, 0.119, 0.0851, 0.1323]);
   });
   it("keeps two-type and four-type configuration synchronized", () => {
     const problem = createProblem();
@@ -114,9 +133,11 @@ describe("PvmDecisionProblem", () => {
   it("requires paired patterns and a nonzero direction", () => {
     const problem = createProblem();
     problem.psi = [1, 2, 3];
-    expect(() => problem.scores).toThrow(/together/);
+    expect(() => problem.scores).toThrow(new Error("PVM psi and phi must be provided together."));
     problem.phi = [1, 2, 3];
-    expect(() => problem.scores).toThrow(/divisor/);
+    expect(() => problem.scores).toThrow(
+      new Error("The method is undefined because a divisor is zero or non-finite."),
+    );
   });
 });
 

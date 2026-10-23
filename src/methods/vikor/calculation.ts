@@ -5,7 +5,7 @@ export function calculateVikor(
   matrix: number[][],
   weights: number[],
   v: number,
-  equalRange: "zero" | "pyrepo" = "zero",
+  equalRange: "zero" | "preserve" = "zero",
 ) {
   const cols = columns(matrix);
   const fstar = cols.map((col) => Math.max(...col));
@@ -23,7 +23,7 @@ export function calculateVikor(
   const scaled = (values: number[]): number[] => {
     const min = Math.min(...values),
       max = Math.max(...values);
-    if (min === max) return values.map((x) => (equalRange === "pyrepo" ? x : 0));
+    if (min === max) return values.map((x) => (equalRange === "preserve" ? x : 0));
     return values.map((x) => (x - min) / (max - min));
   };
   const scaledS = scaled(S),

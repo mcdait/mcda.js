@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, test } from "@jest/globals";
 import { CriterionType } from "../../../src/types";
 import {
@@ -28,9 +29,9 @@ describe("PrometheeDecisionProblem", () => {
   test("calculates scores with one preference function per criterion", () => {
     const problem = createPrometheeProblem();
 
-    expect(problem.scores[0]).toBeCloseTo(0.4);
-    expect(problem.scores[1]).toBeCloseTo(-0.4);
-    expect(problem.scores[2]).toBeCloseTo(0);
+    expect(round4(problem.scores[0])).toBe(0.4);
+    expect(round4(problem.scores[1])).toBe(-0.4);
+    expect(round4(problem.scores[2])).toBe(0);
   });
 
   test("accepts a custom preference function", () => {
@@ -48,8 +49,8 @@ describe("PrometheeDecisionProblem", () => {
     problem.types = [CriterionType.BENEFIT];
     problem.preferenceFunctions = [customPreference];
 
-    expect(problem.scores[0]).toBeCloseTo(0.5);
-    expect(problem.scores[1]).toBeCloseTo(-0.5);
+    expect(round4(problem.scores[0])).toBe(0.5);
+    expect(round4(problem.scores[1])).toBe(-0.5);
   });
 
   test("requires one preference function per weight", () => {
@@ -57,7 +58,9 @@ describe("PrometheeDecisionProblem", () => {
 
     problem.preferenceFunctions = [usualPreference];
 
-    expect(() => problem.scores).toThrow("PROMETHEE requires one preference function per weight.");
+    expect(() => problem.scores).toThrow(
+      new Error("PROMETHEE requires one preference function per weight."),
+    );
   });
 
   test("requires preference functions to be callable", () => {
@@ -65,7 +68,9 @@ describe("PrometheeDecisionProblem", () => {
 
     problem.preferenceFunctions = [usualPreference, undefined as unknown as PreferenceFunction];
 
-    expect(() => problem.scores).toThrow("PROMETHEE preference functions must be callable.");
+    expect(() => problem.scores).toThrow(
+      new Error("PROMETHEE preference functions must be callable."),
+    );
   });
 
   test.each([Number.NaN, Number.POSITIVE_INFINITY, -0.1, 1.1])(
@@ -77,7 +82,7 @@ describe("PrometheeDecisionProblem", () => {
       problem.preferenceFunctions = [invalidPreference, usualPreference];
 
       expect(() => problem.scores).toThrow(
-        "PROMETHEE preference function must return a finite number between 0 and 1.",
+        new Error("PROMETHEE preference function must return a finite number between 0 and 1."),
       );
     },
   );

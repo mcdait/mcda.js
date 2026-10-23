@@ -1,8 +1,9 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { SawDecisionProblem } from "../../../src/methods/saw";
 import type { SawDebugResults } from "../../../src/methods/saw";
 import { CriterionType } from "../../../src/types";
-import { sumNormalizationCallback } from "../../../src/utils";
+import { sumNormalizationCallback, vectorNormalizationCallback } from "../../../src/utils";
 
 function createSawProblem(): SawDecisionProblem {
   const problem = new SawDecisionProblem();
@@ -22,16 +23,58 @@ function createSawProblem(): SawDecisionProblem {
 }
 
 describe("SawDecisionProblem", () => {
+  it("SAW rejects NaN weights before calculating scores", () => {
+    const problem = new SawDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [NaN];
+    problem.types = [1];
+    problem.normalizationCallback = vectorNormalizationCallback;
+    expect(() => problem.scores).toThrow(new Error("Weights must contain 1 finite values."));
+  });
+
+  it.each([
+    { label: "infinite", weights: [Infinity], error: "Weights must contain 1 finite values." },
+    {
+      label: "negative",
+      weights: [-1],
+      error: "Weights must be non-negative with a positive sum.",
+    },
+    { label: "all zero", weights: [0], error: "Weights must be non-negative with a positive sum." },
+  ])("SAW rejects $label weights", ({ weights, error }) => {
+    const problem = new SawDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = weights;
+    problem.types = [1];
+    problem.normalizationCallback = vectorNormalizationCallback;
+    expect(() => problem.scores).toThrow(new Error(error));
+  });
+
+  it("isolates normalization callback mutations", () => {
+    const problem = new SawDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   it("calculates preference scores and ranks alternatives", () => {
     const problem = createSawProblem();
     const scores = problem.scores;
-    const roundedScores = scores.map((score) => Math.round(score * 10000) / 10000);
     const rankedAlternatives = problem.alternatives
       .map((alternative, index) => ({ alternative, score: scores[index] ?? 0 }))
       .sort((left, right) => right.score - left.score)
       .map(({ alternative }) => alternative);
 
-    expect(roundedScores).toEqual([0.3265, 0.358, 0.3155]);
+    expect(round4(scores)).toEqual([0.3265, 0.358, 0.3155]);
     expect(rankedAlternatives).toEqual(["Laptop B", "Laptop A", "Laptop C"]);
   });
 
@@ -41,7 +84,7 @@ describe("SawDecisionProblem", () => {
       problem.normalizationCallback = undefined;
 
       expect(() => problem.scores).toThrow(
-        "This SAW implementation requires a normalization callback.",
+        new Error("This SAW implementation requires a normalization callback."),
       );
     });
 
@@ -50,7 +93,7 @@ describe("SawDecisionProblem", () => {
       problem.normalizationCallback = () => [[1, 1, 1]];
 
       expect(() => problem.scores).toThrow(
-        "SAW normalized matrix must contain one row per alternative.",
+        new Error("SAW normalized matrix must contain one row per alternative."),
       );
     });
 
@@ -59,7 +102,7 @@ describe("SawDecisionProblem", () => {
       problem.normalizationCallback = () => [[], [], []];
 
       expect(() => problem.scores).toThrow(
-        "SAW normalized matrix rows must match the weights length.",
+        new Error("SAW normalized matrix rows must match the weights length."),
       );
     });
 
@@ -71,7 +114,9 @@ describe("SawDecisionProblem", () => {
         [1, 1, 1],
       ];
 
-      expect(() => problem.scores).toThrow("SAW normalized matrix values must be finite.");
+      expect(() => problem.scores).toThrow(
+        new Error("SAW normalized matrix values must be finite."),
+      );
     });
   });
 

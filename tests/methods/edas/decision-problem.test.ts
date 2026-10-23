@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { EdasDecisionProblem } from "../../../src/methods/edas";
 import type { EdasDebugResults } from "../../../src/methods/edas";
@@ -17,11 +18,11 @@ const types = [CriterionType.BENEFIT, CriterionType.BENEFIT, CriterionType.COST]
 function createEdasProblem(): EdasDecisionProblem {
   const problem = new EdasDecisionProblem();
 
-  problem.alternatives = alternatives;
-  problem.criteria = criteria;
-  problem.matrix = matrix;
-  problem.weights = weights;
-  problem.types = types;
+  problem.alternatives = [...alternatives];
+  problem.criteria = [...criteria];
+  problem.matrix = matrix.map((row) => [...row]);
+  problem.weights = [...weights];
+  problem.types = [...types];
 
   return problem;
 }
@@ -29,9 +30,8 @@ function createEdasProblem(): EdasDecisionProblem {
 describe("EdasDecisionProblem", () => {
   it("calculates appraisal scores", () => {
     const problem = createEdasProblem();
-    const roundedScores = problem.scores.map((score) => Math.round(score * 10000) / 10000);
 
-    expect(roundedScores).toEqual([0.4245, 0.7626, 0.2063]);
+    expect(round4(problem.scores)).toEqual([0.4245, 0.7626, 0.2063]);
   });
 
   it("handles alternatives with no positive or negative distances", () => {
@@ -56,7 +56,7 @@ describe("EdasDecisionProblem", () => {
     ];
 
     expect(() => problem.scores).toThrow(
-      "EDAS average solution for criterion at index 0 must not be zero.",
+      new Error("EDAS average solution for criterion at index 0 must not be zero."),
     );
   });
 

@@ -12,4 +12,6 @@ export type {
   WeightsInputInterface,
   NormalizationCallback,
   ConfigurableNormalizationInterface,
+  VariabilityCallback,
+  ConfigurableVariabilityInterface,
 } from "./core";

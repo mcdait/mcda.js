@@ -1,5 +1,6 @@
 import { AbstractNormalizedDecisionProblem } from "../../core";
 import type { DecisionMatrix, Scores } from "../../types";
+import { validateWeights } from "../shared/numeric";
 
 export class SawDecisionProblem extends AbstractNormalizedDecisionProblem {
   public override get scores(): Scores {
@@ -9,6 +10,7 @@ export class SawDecisionProblem extends AbstractNormalizedDecisionProblem {
 
   protected override validate(): void {
     super.validate();
+    validateWeights(this.weights, this.weights.length);
 
     if (this.normalizationCallback === undefined) {
       throw new Error("This SAW implementation requires a normalization callback.");
@@ -20,7 +22,7 @@ export class SawDecisionProblem extends AbstractNormalizedDecisionProblem {
       throw new Error("This SAW implementation requires a normalization callback.");
     }
 
-    const normalizedMatrix = this.normalizationCallback(this.matrix, this.types);
+    const normalizedMatrix = this.normalizeMatrix(this.normalizationCallback);
     this.validateNormalizedMatrix(normalizedMatrix);
     this.addToDebugBag("normalizedMatrix", normalizedMatrix);
 

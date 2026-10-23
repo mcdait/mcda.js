@@ -1,8 +1,8 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CriterionType, determineVmcmPatterns, VmcmDecisionProblem } from "../../../src";
 import { rank } from "../../../src/utils/ranking";
 
-const rounded = (values: number[]) => values.map((x) => Math.round(x * 10000) / 10000);
 function createProblem(second = false): VmcmDecisionProblem {
   const problem = new VmcmDecisionProblem();
   problem.matrix = second
@@ -27,10 +27,10 @@ function createProblem(second = false): VmcmDecisionProblem {
 
 describe("VmcmDecisionProblem", () => {
   it("calculates scores for three alternatives", () => {
-    expect(rounded(createProblem().scores)).toEqual([0.4928, 0.594, 0.4675]);
+    expect(round4(createProblem().scores)).toEqual([0.4928, 0.594, 0.4675]);
   });
   it("calculates scores with four criteria and unequal weights", () => {
-    expect(rounded(createProblem(true).scores)).toEqual([0.6021, 0.4584, 0.5704, 0.3968]);
+    expect(round4(createProblem(true).scores)).toEqual([0.6021, 0.4584, 0.5704, 0.3968]);
   });
   it("supports matrixObj, recalculation and optional debug without mutating inputs", () => {
     const problem = createProblem();
@@ -55,28 +55,47 @@ describe("VmcmDecisionProblem", () => {
     problem.scores;
     expect(problem.debugBag).toBeUndefined();
   });
-  it("rejects malformed matrices, non-finite data and invalid weights", () => {
+  it.each([
+    {
+      label: "empty matrix",
+      matrix: [],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem requires at least one alternative.",
+    },
+    {
+      label: "ragged row",
+      matrix: [[1, 2]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Decision problem matrix rows must match the weights length.",
+    },
+    {
+      label: "NaN value",
+      matrix: [[NaN, 2, 3]],
+      weights: [0.4, 0.35, 0.25],
+      error: "Matrix row must contain 3 finite values.",
+    },
+    {
+      label: "negative weight",
+      matrix: [[1, 2, 3]],
+      weights: [-1, 1, 1],
+      error: "Weights must be non-negative with a positive sum.",
+    },
+  ])("rejects $label", ({ matrix, weights, error }) => {
     const problem = createProblem();
-    problem.matrix = [];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[NaN, 2, 3]];
-    expect(() => problem.scores).toThrow();
-    problem.matrix = [[1, 2, 3]];
-    problem.weights = [-1, 1, 1];
-    expect(() => problem.scores).toThrow();
+    problem.matrix = matrix.map((row) => [...row]);
+    problem.weights = [...weights];
+    expect(() => problem.scores).toThrow(new Error(error));
   });
   it("determines patterns using sample standardization and interpolated quartiles", () => {
     const problem = createProblem(true);
-    expect(rounded(problem.pattern)).toEqual([0.4804, 0.6847, -0.5298, -0.5637]);
-    expect(rounded(problem.antiPattern)).toEqual([-0.4804, -0.6847, 0.4636, 0.6765]);
+    expect(round4(problem.pattern)).toEqual([0.4804, 0.6847, -0.5298, -0.5637]);
+    expect(round4(problem.antiPattern)).toEqual([-0.4804, -0.6847, 0.4636, 0.6765]);
   });
   it("calculates scores using custom patterns", () => {
     const problem = createProblem(true);
     problem.pattern = [1, 2, -1, -2];
     problem.antiPattern = [-1, -2, 1, 2];
-    expect(rounded(problem.scores)).toEqual([0.5469, 0.4725, 0.5252, 0.4555]);
+    expect(round4(problem.scores)).toEqual([0.5469, 0.4725, 0.5252, 0.4555]);
   });
   it("rejects constant columns and identical patterns", () => {
     const problem = createProblem();
@@ -84,10 +103,12 @@ describe("VmcmDecisionProblem", () => {
       [1, 2, 3],
       [1, 3, 4],
     ];
-    expect(() => problem.scores).toThrow(/constant/);
+    expect(() => problem.scores).toThrow(new Error("Cannot standardize a constant criterion."));
     const other = createProblem();
     other.pattern = [...other.antiPattern];
-    expect(() => other.scores).toThrow(/divisor/);
+    expect(() => other.scores).toThrow(
+      new Error("The method is undefined because a divisor is zero or non-finite."),
+    );
   });
 });
 

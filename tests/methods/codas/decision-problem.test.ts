@@ -1,3 +1,4 @@
+import { round4 } from "../../helpers/round-four-decimals";
 import { describe, expect, it } from "@jest/globals";
 import { CodasDecisionProblem } from "../../../src/methods/codas";
 import type { CodasDebugResults } from "../../../src/methods/codas";
@@ -25,16 +26,43 @@ function createCodasProblem(): CodasDecisionProblem {
 }
 
 describe("CodasDecisionProblem", () => {
+  it("CODAS rejects non-finite normalized values", () => {
+    const problem = new CodasDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = () => [[NaN], [1]];
+    expect(() => problem.scores).toThrow(
+      new Error("CODAS normalized matrix values must be finite."),
+    );
+  });
+
+  it("isolates normalization callback mutations", () => {
+    const problem = new CodasDecisionProblem();
+    problem.matrix = [[1], [2]];
+    problem.weights = [1];
+    problem.types = [1];
+    problem.normalizationCallback = (matrix, types) => {
+      matrix[0][0] = 3;
+      types[0] = -1;
+      return [[0.5], [1]];
+    };
+    problem.scores;
+    expect({ matrix: problem.matrix, types: problem.types }).toEqual({
+      matrix: [[1], [2]],
+      types: [1],
+    });
+  });
+
   it("ranks alternatives by their distance from the negative ideal solution", () => {
     const problem = createCodasProblem();
     const scores = problem.scores;
-    const roundedScores = scores.map((score) => Math.round(score * 10000) / 10000);
     const rankedAlternatives = problem.alternatives
       .map((alternative, index) => ({ alternative, score: scores[index] ?? 0 }))
       .sort((left, right) => right.score - left.score)
       .map(({ alternative }) => alternative);
 
-    expect(roundedScores).toEqual([-0.1442, 0.2928, -0.1486]);
+    expect(round4(scores)).toEqual([-0.1442, 0.2928, -0.1486]);
     expect(rankedAlternatives).toEqual(["Laptop B", "Laptop A", "Laptop C"]);
   });
 
@@ -45,17 +73,13 @@ describe("CodasDecisionProblem", () => {
     problem.types = [CriterionType.BENEFIT];
     problem.normalizationCallback = () => [[0.5], [0.49]];
 
-    const scoresWithoutTaxicabDistance = problem.scores.map(
-      (score) => Math.round(score * 10000) / 10000,
-    );
-    expect(scoresWithoutTaxicabDistance).toEqual([0.01, -0.01]);
+    const scoresWithoutTaxicabDistance = problem.scores;
+    expect(round4(scoresWithoutTaxicabDistance)).toEqual([0.01, -0.01]);
 
     problem.tau = 0.005;
 
-    const scoresWithTaxicabDistance = problem.scores.map(
-      (score) => Math.round(score * 10000) / 10000,
-    );
-    expect(scoresWithTaxicabDistance).toEqual([0.02, -0.02]);
+    const scoresWithTaxicabDistance = problem.scores;
+    expect(round4(scoresWithTaxicabDistance)).toEqual([0.02, -0.02]);
   });
 
   describe("validations", () => {
@@ -64,7 +88,7 @@ describe("CodasDecisionProblem", () => {
       problem.normalizationCallback = undefined;
 
       expect(() => problem.scores).toThrow(
-        "This CODAS implementation requires a normalization callback.",
+        new Error("This CODAS implementation requires a normalization callback."),
       );
     });
 
@@ -73,7 +97,7 @@ describe("CodasDecisionProblem", () => {
       problem.tau = -0.01;
 
       expect(() => problem.scores).toThrow(
-        "CODAS threshold tau must be a non-negative finite number.",
+        new Error("CODAS threshold tau must be a non-negative finite number."),
       );
     });
 
@@ -82,7 +106,7 @@ describe("CodasDecisionProblem", () => {
       problem.normalizationCallback = () => [[1, 1, 1]];
 
       expect(() => problem.scores).toThrow(
-        "CODAS normalized matrix must contain one row per alternative.",
+        new Error("CODAS normalized matrix must contain one row per alternative."),
       );
     });
   });
