@@ -134,7 +134,7 @@ export default defineComponent({
       problems.promethee.types = this.criteria.map((criterion) => CriterionType.BENEFIT);
       problems.promethee.enableDebug(true);
 
-      const stdevs: [number, number, number] = [14.65, 5.88, 9.77];
+      const stdevs: [number, number, number] = [14.37, 5.77, 9.59];
 
       problems.promethee.preferenceFunctions = [
         linearPreference(
@@ -153,6 +153,15 @@ export default defineComponent({
 
       return problems;
     },
+    scores(): Rankings {
+      return {
+        saw: this.decisionProblems.saw!.scores,
+        topsis: this.decisionProblems.topsis!.scores,
+        vikor: this.decisionProblems.vikor!.scores,
+        waspas: this.decisionProblems.waspas!.scores,
+        promethee: this.decisionProblems.promethee!.scores,
+      };
+    },
     rankings(): Rankings {
       return {
         saw: rank(this.decisionProblems.saw!.scores),
@@ -167,6 +176,9 @@ export default defineComponent({
     this.drawPlot();
   },
   methods: {
+    formatScore(value?: number): string {
+      return value?.toFixed(4) ?? "";
+    },
     resetWeights() {
       this.weights = { ...initialWeights };
       this.newWeights = { ...initialWeights };
@@ -525,6 +537,48 @@ export default defineComponent({
               </div>
             </div>
           </div>
+
+          <div class="accordion-item">
+            <h2 class="accordion-header">
+              <button
+                class="accordion-button collapsed"
+                type="button"
+                data-bs-toggle="collapse"
+                data-bs-target="#scores"
+                aria-expanded="false"
+                aria-controls="scores"
+              >
+                Scores
+              </button>
+            </h2>
+            <div id="scores" class="accordion-collapse collapse">
+              <div class="accordion-body">
+                <div class="table-responsive" style="max-height: 50vh; overflow-y: auto">
+                  <table class="table table-bordered table-striped">
+                    <thead class="sticky-top">
+                      <tr>
+                        <th>ISO</th>
+                        <th v-for="(method, index) in Object.keys(scores)" :key="method">
+                          {{ method.toUpperCase() }}
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr v-for="(country, index) in countries" :key="country">
+                        <td>{{ country }}</td>
+                        <td v-for="(method, methodIndex) in Object.keys(scores)" :key="method">
+                          <div class="d-flex align-items-center gap-1">
+                            <span>{{ formatScore(scores[method]?.[index]) }}</span>
+                          </div>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </div>
+          </div>
+
           <div class="accordion-item">
             <h2 class="accordion-header">
               <button
