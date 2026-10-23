@@ -90,7 +90,7 @@ describe("TopsisDecisionProblem", () => {
 
   test("recomputes after changing weights without mutating input data", () => {
     const problem = createTopsisProblem();
-    const before = structuredClone(problem.matrix);
+    const before = problem.matrix.map((row) => [...row]);
     const initial = problem.scores;
     problem.weights = [0.2, 0.3, 0.5];
     expect(problem.scores).not.toEqual(initial);
